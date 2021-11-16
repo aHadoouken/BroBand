@@ -1,0 +1,9 @@
+cmake-build-debug/
+idea/
+src/build/
+src/cmake-build-debug/
+src/CMakeFiles
+build/
+test/build/
+test/cmake-build-debug/
+test/CMakeFiles
