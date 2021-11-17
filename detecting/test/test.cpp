@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 #include "detecting.h"
+#include "Exception.h"
 
 TEST(ST_PROBABILITY, default_value_probability) {
 
@@ -21,9 +22,9 @@ TEST(ST_MESSAGE_WRAPPER, default_value_message_wrapper) {
 
     MessageWrapper msgWrap;
     EXPECT_EQ(msgWrap.msg, nullptr);
-    EXPECT_EQ(msgWrap.senderId, 0);
-    EXPECT_EQ(msgWrap.chatId, 0);
-    EXPECT_EQ(msgWrap.isReplace, false);
+    EXPECT_EQ(msgWrap.sender_id, 0);
+    EXPECT_EQ(msgWrap.chat_id, 0);
+    EXPECT_EQ(msgWrap.is_replace, false);
 
 }
 
@@ -37,32 +38,58 @@ TEST(ST_IMAGE_WRAPPER, default_value_image_wrapper) {
 
     ImageWrapper imgWrap;
     EXPECT_EQ(imgWrap.img, nullptr);
-    EXPECT_EQ(imgWrap.senderId, 0);
-    EXPECT_EQ(imgWrap.chatId, 0);
-    EXPECT_EQ(imgWrap.isBlur, false);
+    EXPECT_EQ(imgWrap.sender_id, 0);
+    EXPECT_EQ(imgWrap.chat_id, 0);
+    EXPECT_EQ(imgWrap.is_blur, false);
 
 }
 
-TEST(IMAGE_DETECTOR, class_img_detect) {
+TEST(IMAGE_DETECTOR, set_threshold) {
 
     PornImageDetector imgDetector;
-
     EXPECT_EQ(imgDetector.set_threshold(0), 0);
-    EXPECT_EQ(imgDetector.load_model(0), 0);
-    EXPECT_EQ(imgDetector.forward(nullptr), nullptr);
-    EXPECT_EQ(imgDetector.blurring(nullptr), nullptr);
-
 }
 
-TEST(MESSAGE_DETECTOR, class_msg_detect) {
+TEST(IMAGE_DETECTOR, load_model) {
+
+    PornImageDetector imgDetector;
+    EXPECT_EQ(imgDetector.load_model(""), 0);
+}
+
+TEST(IMAGE_DETECTOR, forward) {
+
+    PornImageDetector imgDetector;
+    EXPECT_THROW(imgDetector.forward(nullptr), NotImplemented);
+}
+
+TEST(IMAGE_DETECTOR, blurring) {
+
+    PornImageDetector imgDetector;
+    EXPECT_EQ(imgDetector.blurring(nullptr), nullptr);
+}
+
+TEST(MESSAGE_DETECTOR, set_threshold) {
 
     PornTextDetector msgDetector;
-
     EXPECT_EQ(msgDetector.set_threshold(0), 0);
-    EXPECT_EQ(msgDetector.load_model(0), 0);
-    EXPECT_EQ(msgDetector.forward(nullptr), nullptr);
-    EXPECT_EQ(msgDetector.text_replace(nullptr), nullptr);
+}
 
+TEST(MESSAGE_DETECTOR, load_model) {
+
+    PornTextDetector msgDetector;
+    EXPECT_EQ(msgDetector.load_model(""), 0);
+}
+
+TEST(MESSAGE_DETECTOR, forward) {
+
+    PornTextDetector msgDetector;
+    EXPECT_THROW(msgDetector.forward(nullptr), NotImplemented);
+}
+
+TEST(MESSAGE_DETECTOR, text_replace) {
+
+    PornTextDetector msgDetector;
+    EXPECT_EQ(msgDetector.text_replace(nullptr), nullptr);
 }
 
 int main(int argc, char *argv[]) {

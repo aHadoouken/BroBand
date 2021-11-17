@@ -20,11 +20,11 @@ struct Message {
 
 struct MessageWrapper {
     Message* msg;
-    std::size_t senderId;
-    std::size_t chatId;
-    bool isReplace;
+    size_t sender_id;
+    size_t chat_id;
+    bool is_replace;
 
-    MessageWrapper() : msg(nullptr), senderId(0), chatId(0), isReplace(false) {}
+    MessageWrapper() : msg(nullptr), sender_id(0), chat_id(0), is_replace(false) {}
 };
 
 struct Image {
@@ -33,11 +33,11 @@ struct Image {
 
 struct ImageWrapper {
     Image* img;
-    std::size_t senderId;
-    std::size_t chatId;
-    bool isBlur;
+    size_t sender_id;
+    size_t chat_id;
+    bool is_blur;
 
-    ImageWrapper() : img(nullptr), senderId(0), chatId(0), isBlur(false) {}
+    ImageWrapper() : img(nullptr), sender_id(0), chat_id(0), is_blur(false) {}
 };
 
 template <typename T>
@@ -52,7 +52,7 @@ public:
 
     virtual int load_model(std::string path) = 0;
 
-    virtual Probability* forward(T* data) = 0;
+    virtual Probability forward(T* data) = 0;
 
 };
 
@@ -62,7 +62,7 @@ public:
 
     int load_model(std::string path) override;
 
-    Probability* forward(Image* data) override;
+    Probability forward(Image* data) override;
 
     ImageWrapper* blurring(Image* data);
 
@@ -74,7 +74,7 @@ public:
 
     int load_model(std::string path) override;
 
-    Probability* forward(Message* data) override;
+    Probability forward(Message* data) override;
 
     MessageWrapper* text_replace(Message* data);
 };

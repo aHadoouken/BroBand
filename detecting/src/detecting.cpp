@@ -3,6 +3,7 @@
 //
 
 #include "detecting.h"
+#include "Exception.h"
 
 
 int PornImageDetector::set_threshold(double _threshold) {
@@ -13,8 +14,8 @@ int PornImageDetector::load_model(std::string path) {
     return 0;
 }
 
-Probability* PornImageDetector::forward(Image *data) {
-    return nullptr;
+Probability PornImageDetector::forward(Image *data) {
+    throw NotImplemented();
 }
 
 ImageWrapper* PornImageDetector::blurring(Image *data) {
@@ -30,8 +31,8 @@ int PornTextDetector::load_model(std::string path) {
     return 0;
 }
 
-Probability *PornTextDetector::forward(Message *data) {
-    return nullptr;
+Probability PornTextDetector::forward(Message *data) {
+    throw NotImplemented();
 }
 
 MessageWrapper *PornTextDetector::text_replace(Message *data) {
