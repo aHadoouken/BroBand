@@ -6,19 +6,19 @@
 #include "detecting.h"
 #include "Exception.h"
 
-TEST(ST_PROBABILITY, default_value_probability) {
+TEST(TEST_STRUCTURE, probability) {
 
     Probability prob;
-    EXPECT_EQ(prob.predict_proba, nullptr);
+    EXPECT_EQ(prob.predict_proba.size(), 0);
 }
 
-TEST(ST_MESSAGE, default_value_message) {
+TEST(TEST_STRUCTURE, message) {
 
     Message msg;
     EXPECT_EQ(msg.text, "");
 }
 
-TEST(ST_MESSAGE_WRAPPER, default_value_message_wrapper) {
+TEST(TEST_STRUCTURE, message_wrapper) {
 
     MessageWrapper msgWrap;
     EXPECT_EQ(msgWrap.msg, nullptr);
@@ -28,13 +28,13 @@ TEST(ST_MESSAGE_WRAPPER, default_value_message_wrapper) {
 
 }
 
-TEST(ST_IMAGE, default_value_image) {
+TEST(TEST_STRUCTURE, image) {
 
     Image img;
     EXPECT_EQ(img.data.size(), 0);
 }
 
-TEST(ST_IMAGE_WRAPPER, default_value_image_wrapper) {
+TEST(TEST_STRUCTURE, image_wrapper) {
 
     ImageWrapper imgWrap;
     EXPECT_EQ(imgWrap.img, nullptr);
@@ -47,49 +47,81 @@ TEST(ST_IMAGE_WRAPPER, default_value_image_wrapper) {
 TEST(IMAGE_DETECTOR, set_threshold) {
 
     PornImageDetector imgDetector;
-    EXPECT_EQ(imgDetector.set_threshold(0), 0);
+    double _threshold = 0.5;
+
+    EXPECT_EQ(imgDetector.set_threshold(_threshold), 0);
 }
 
 TEST(IMAGE_DETECTOR, load_model) {
 
     PornImageDetector imgDetector;
-    EXPECT_EQ(imgDetector.load_model(""), 0);
+    std::string path = "model/image_detect.pth";
+
+    EXPECT_EQ(imgDetector.load_model(path), 0);
 }
 
 TEST(IMAGE_DETECTOR, forward) {
 
     PornImageDetector imgDetector;
-    EXPECT_THROW(imgDetector.forward(nullptr), NotImplemented);
+    Image* img;
+
+    Probability prob_true;
+    prob_true.predict_proba = {0.2, 0.8};
+
+    Probability pred_prob = imgDetector.forward(img);
+
+    for (int i = 0; i < 2; ++i) {
+        EXPECT_DOUBLE_EQ(pred_prob.predict_proba[i], prob_true.predict_proba[i]);
+    }
 }
 
 TEST(IMAGE_DETECTOR, blurring) {
 
     PornImageDetector imgDetector;
-    EXPECT_EQ(imgDetector.blurring(nullptr), nullptr);
+    Image* img = nullptr;
+    ImageWrapper* img_wrap = imgDetector.blurring(img);
+
+    EXPECT_TRUE(img_wrap->is_blur);
 }
 
 TEST(MESSAGE_DETECTOR, set_threshold) {
 
     PornTextDetector msgDetector;
-    EXPECT_EQ(msgDetector.set_threshold(0), 0);
+    double _threshold = 0.5;
+
+    EXPECT_EQ(msgDetector.set_threshold(_threshold), 0);
 }
 
 TEST(MESSAGE_DETECTOR, load_model) {
 
     PornTextDetector msgDetector;
-    EXPECT_EQ(msgDetector.load_model(""), 0);
+    std::string path = "model/image_detect.pth";
+
+    EXPECT_EQ(msgDetector.load_model(path), 0);
 }
 
 TEST(MESSAGE_DETECTOR, forward) {
 
     PornTextDetector msgDetector;
-    EXPECT_THROW(msgDetector.forward(nullptr), NotImplemented);
+    Message* msg;
+
+    Probability prob_true;
+    prob_true.predict_proba = {0.2, 0.8};
+
+    Probability pred_prob = msgDetector.forward(msg);
+
+    for (int i = 0; i < 2; ++i) {
+        EXPECT_DOUBLE_EQ(pred_prob.predict_proba[i], prob_true.predict_proba[i]);
+    }
 }
 
 TEST(MESSAGE_DETECTOR, text_replace) {
 
     PornTextDetector msgDetector;
-    EXPECT_EQ(msgDetector.text_replace(nullptr), nullptr);
+    Message* msg = nullptr;
+    MessageWrapper* msg_wrap = msgDetector.text_replace(msg);
+
+    EXPECT_TRUE(msg_wrap->is_replace);
 }
 
 int main(int argc, char *argv[]) {
