@@ -19,7 +19,7 @@ jobs:
 
 # покрытие
   gcovr:
-    needs: build-project
+    needs: [build-project, formatting-check]
     name: Gcovr
     runs-on: ubuntu-latest
     steps:
@@ -37,3 +37,27 @@ jobs:
         with:
           name: coverage-report
           path: cov.html
+          
+# соотсветствие формату написания кода
+  formatting-check:
+    needs: build-project
+    name: Format checking
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run clang-format style check.
+      uses: jidicula/clang-format-action@v4.2.0
+      with:
+        clang-format-version: '13'
+        check-path: 'detecting/src''detecting/include'
+        
+# Статический анализатор кода
+  cpp-check:
+    needs: build-project
+    name: Static code analysis
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: sudo apt-get -qq update
+    - run: sudo apt-get install cppcheck
+    - run: sudo cppcheck --enable=all --inconclusive --check-config --suppress=missingIncludeSystem -I detecting/include --language=c .detecting/src
