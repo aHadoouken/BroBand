@@ -19,7 +19,7 @@ jobs:
 
 # покрытие
   gcovr:
-    needs: build-project
+    needs: [build-project, formatting-check]
     name: Gcovr
     runs-on: ubuntu-latest
     steps:
@@ -60,4 +60,4 @@ jobs:
     - uses: actions/checkout@v2
     - run: sudo apt-get -qq update
     - run: sudo apt-get install cppcheck
-    - run: sudo cppcheck --enable=all --inconclusive --check-config --suppress=missingIncludeSystem -I include --language=c .detecting/src
+    - run: sudo cppcheck --enable=all --inconclusive --check-config --suppress=missingIncludeSystem -I detecting/include --language=c .detecting/src
