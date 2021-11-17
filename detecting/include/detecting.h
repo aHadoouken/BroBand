@@ -9,9 +9,7 @@
 #include <iostream>
 
 struct Probability {
-    std::vector<double>* predict_proba;
-
-    Probability() : predict_proba(nullptr) {}
+    std::vector<double> predict_proba;
 };
 
 struct Message {
@@ -78,7 +76,6 @@ public:
 
     MessageWrapper* text_replace(Message* data);
 };
-
 
 
 #endif //BROBAND_DETECTING_H
