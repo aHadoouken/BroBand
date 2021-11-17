@@ -18,7 +18,7 @@ Probability PornImageDetector::forward(Image *data) {
     throw NotImplemented();
 }
 
-ImageWrapper* PornImageDetector::blurring(Image *data) {
+ImageWrapper *PornImageDetector::blurring(Image *data) {
     throw NotImplemented();
 }
 

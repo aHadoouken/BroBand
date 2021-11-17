@@ -5,8 +5,8 @@
 #ifndef BROBAND_DETECTING_H
 #define BROBAND_DETECTING_H
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
 struct Probability {
     std::vector<double> predict_proba;
@@ -17,7 +17,7 @@ struct Message {
 };
 
 struct MessageWrapper {
-    Message* msg;
+    Message *msg;
     size_t sender_id;
     size_t chat_id;
     bool is_replace;
@@ -30,7 +30,7 @@ struct Image {
 };
 
 struct ImageWrapper {
-    Image* img;
+    Image *img;
     size_t sender_id;
     size_t chat_id;
     bool is_blur;
@@ -38,7 +38,7 @@ struct ImageWrapper {
     ImageWrapper() : img(nullptr), sender_id(0), chat_id(0), is_blur(false) {}
 };
 
-template <typename T>
+template<typename T>
 class TorchWrapper {
 private:
     std::string saved_model = "";
@@ -50,8 +50,7 @@ public:
 
     virtual int load_model(std::string path) = 0;
 
-    virtual Probability forward(T* data) = 0;
-
+    virtual Probability forward(T *data) = 0;
 };
 
 class PornImageDetector : TorchWrapper<Image> {
@@ -60,22 +59,21 @@ public:
 
     int load_model(std::string path) override;
 
-    Probability forward(Image* data) override;
+    Probability forward(Image *data) override;
 
-    ImageWrapper* blurring(Image* data);
-
+    ImageWrapper *blurring(Image *data);
 };
 
 class PornTextDetector : TorchWrapper<Message> {
 public:
-    int set_threshold (double _threshold) override;
+    int set_threshold(double _threshold) override;
 
     int load_model(std::string path) override;
 
-    Probability forward(Message* data) override;
+    Probability forward(Message *data) override;
 
-    MessageWrapper* text_replace(Message* data);
+    MessageWrapper *text_replace(Message *data);
 };
 
 
-#endif //BROBAND_DETECTING_H
+#endif//BROBAND_DETECTING_H

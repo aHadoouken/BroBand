@@ -2,9 +2,9 @@
 // Created by d3vyatk4 on 16.11.2021.
 //
 
-#include "gtest/gtest.h"
-#include "detecting.h"
 #include "Exception.h"
+#include "detecting.h"
+#include "gtest/gtest.h"
 
 TEST(TEST_STRUCTURE, probability) {
 
@@ -25,7 +25,6 @@ TEST(TEST_STRUCTURE, message_wrapper) {
     EXPECT_EQ(msgWrap.sender_id, 0);
     EXPECT_EQ(msgWrap.chat_id, 0);
     EXPECT_EQ(msgWrap.is_replace, false);
-
 }
 
 TEST(TEST_STRUCTURE, image) {
@@ -41,7 +40,6 @@ TEST(TEST_STRUCTURE, image_wrapper) {
     EXPECT_EQ(imgWrap.sender_id, 0);
     EXPECT_EQ(imgWrap.chat_id, 0);
     EXPECT_EQ(imgWrap.is_blur, false);
-
 }
 
 TEST(IMAGE_DETECTOR, set_threshold) {
@@ -63,7 +61,7 @@ TEST(IMAGE_DETECTOR, load_model) {
 TEST(IMAGE_DETECTOR, forward) {
 
     PornImageDetector imgDetector;
-    Image* img;
+    Image *img;
 
     Probability prob_true;
     prob_true.predict_proba = {0.2, 0.8};
@@ -78,8 +76,8 @@ TEST(IMAGE_DETECTOR, forward) {
 TEST(IMAGE_DETECTOR, blurring) {
 
     PornImageDetector imgDetector;
-    Image* img = nullptr;
-    ImageWrapper* img_wrap = imgDetector.blurring(img);
+    Image *img = nullptr;
+    ImageWrapper *img_wrap = imgDetector.blurring(img);
 
     EXPECT_TRUE(img_wrap->is_blur);
 }
@@ -103,7 +101,7 @@ TEST(MESSAGE_DETECTOR, load_model) {
 TEST(MESSAGE_DETECTOR, forward) {
 
     PornTextDetector msgDetector;
-    Message* msg;
+    Message *msg;
 
     Probability prob_true;
     prob_true.predict_proba = {0.2, 0.8};
@@ -118,8 +116,8 @@ TEST(MESSAGE_DETECTOR, forward) {
 TEST(MESSAGE_DETECTOR, text_replace) {
 
     PornTextDetector msgDetector;
-    Message* msg = nullptr;
-    MessageWrapper* msg_wrap = msgDetector.text_replace(msg);
+    Message *msg = nullptr;
+    MessageWrapper *msg_wrap = msgDetector.text_replace(msg);
 
     EXPECT_TRUE(msg_wrap->is_replace);
 }

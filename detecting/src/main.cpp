@@ -6,9 +6,5 @@
 
 int main() {
 
-    PornImageDetector obj;
-
-    obj.set_threshold(0);
-
     return 0;
 }
