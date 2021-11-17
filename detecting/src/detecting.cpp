@@ -7,7 +7,7 @@
 
 
 int PornImageDetector::set_threshold(double _threshold) {
-    return 0 ;
+    return 0;
 }
 
 int PornImageDetector::load_model(std::string path) {
@@ -19,11 +19,11 @@ Probability PornImageDetector::forward(Image *data) {
 }
 
 ImageWrapper* PornImageDetector::blurring(Image *data) {
-    return nullptr;
+    throw NotImplemented();
 }
 
 int PornTextDetector::set_threshold(double _threshold) {
-    return 0;
+    throw NotImplemented();
 }
 
 
@@ -36,5 +36,5 @@ Probability PornTextDetector::forward(Message *data) {
 }
 
 MessageWrapper *PornTextDetector::text_replace(Message *data) {
-    return nullptr;
+    throw NotImplemented();
 }
