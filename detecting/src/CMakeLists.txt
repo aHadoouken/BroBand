@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.16)
 # имя проекта
 project(detecting_service)
 
+add_compile_options(-g -O0 -Wextra -Wall -Wextra -Wpedantic -lgcov --coverage)
+add_link_options( -O0 -lgcov --coverage)
+
 # добавляем поиск файлов в директории include
 include_directories("../include")
 
