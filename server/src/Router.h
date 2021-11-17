@@ -1,6 +1,6 @@
 #pragma once
 
-template<typename Handler, Response, Request>
+template<typename Handler, typename Response, typename Request>
 class Router {
 public:
     void AddHandler(std::string method, Handler handler) {
