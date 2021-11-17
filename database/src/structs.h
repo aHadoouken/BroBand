@@ -3,45 +3,45 @@
 #include <string>
 #include <vector>
 
-struct User {
-    int id;
-    std::string NickName;
-    std::string ProfileAvatar;
-    std::string CreatedAt;
-    std::vector<int> ChatsID;
-};
+typedef struct User {
+    unsigned long id;
+    std::string nickname;
+    std::string profile_avatar;
+    std::string created_at;
+    std::vector<unsigned long> chats_id;
+} User;
 
-struct UserForm {
-    std::string NickName;
-    std::string ProfileAvatar;
-};
+typedef struct UserForm {
+    std::string nickname;
+    std::string profile_avatar;
+} UserForm;
 
-struct Chat {
-    int id;
-    std::string ChatName;
-    std::string CreatedAt;
-    int TotalMessages;
-    std::vector<int> UsersID;
-};
+typedef struct Chat {
+    unsigned long id;
+    std::string chat_name;
+    std::string created_at;
+    unsigned long total_messages;
+    std::vector<unsigned long> users_id;
+} Chat;
 
-struct ChatForm {
-    std::string ChatName;
-    std::vector<int> UsersID;
-};
+typedef struct ChatForm {
+    std::string chat_name;
+    std::vector<unsigned long> users_id;
+} ChatForm;
 
-struct Message {
-    int id;
-    int SenderID;
-    int ChatID;
-    std::string Message;
-    std::vector<std::string> Attachment;
-    std::string CreatedAt;
-    int NumInChat;
-};
+typedef struct message {
+    unsigned long id;
+    unsigned long sender_id;
+    unsigned long chat_id;
+    std::string message;
+    std::vector<std::string> attachment;
+    std::string created_at;
+    unsigned long num_in_chat;
+} message;
 
-struct MessageForm {
-    int SenderID;
-    int ChatID;
-    std::string Message;
-    std::vector<std::string> Attachment;
-};
+typedef struct MessageForm {
+    unsigned long sender_id;
+    unsigned long chat_id;
+    std::string message;
+    std::vector<std::string> attachment;
+} MessageForm;

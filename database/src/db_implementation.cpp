@@ -1,3 +1,4 @@
+#include "Exceptions.h"
 #include "db_implementation.h"
 
 bool PostgresDB::OpenConnection() {
@@ -12,11 +13,11 @@ User PostgresDB::AddUser(UserForm user) {
     throw NotImplemented();
 }
 
-User PostgresDB::ExtractUserByID(int id) {
+User PostgresDB::ExtractUserByID(unsigned long id) {
     throw NotImplemented();
 }
 
-User PostgresDB::ExtractUserByNickName(std::string NickName) {
+User PostgresDB::ExtractUserByNickName(std::string nickname) {
     throw NotImplemented();
 }
 
@@ -24,26 +25,29 @@ Chat PostgresDB::AddChat(ChatForm chat) {
     throw NotImplemented();
 }
 
-Chat PostgresDB::ExtractChatByID(int id) {
+Chat PostgresDB::ExtractChatByID(unsigned long id) {
     throw NotImplemented();
 }
 
-std::vector<int> PostgresDB::ExtractChatsIDByUserID(int id) {
+std::vector<unsigned long>
+PostgresDB::ExtractChatsIDByUserID(unsigned long id) {
     throw NotImplemented();
 }
 
-Message PostgresDB::AddMessage(MessageForm msg) {
+message PostgresDB::AddMessage(MessageForm msg) {
     throw NotImplemented();
 }
 
-std::vector<int> PostgresDB::ExtractChatMessagesID(int chatID, int first, int last) {
+std::vector<unsigned long>
+PostgresDB::ExtractChatMessagesID(unsigned long chat_id, unsigned long first,
+                                  unsigned long last) {
     throw NotImplemented();
 }
 
-Message PostgresDB::ExtractMessageByID(int id){
+message PostgresDB::ExtractMessageByID(unsigned long id) {
     throw NotImplemented();
 }
 
-std::vector<int> PostgresDB::LastMessagesByUserID(int id) {
+std::vector<unsigned long> PostgresDB::LastMessagesByUserID(unsigned long id) {
     throw NotImplemented();
 }

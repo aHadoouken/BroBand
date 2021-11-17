@@ -1,118 +1,119 @@
 #include <gtest/gtest.h>
 
+#include "Exceptions.h"
 #include "db_implementation.h"
 
 TEST(DBLibTest, AddUserValidInputs) {
     PostgresDB postgres;
-    struct UserForm userForm;
-    struct User user;
+    UserForm userForm;
+    User user;
     // В качестве ника выбирается время, чтобы не задавался существующий ник
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
     std::ostringstream oss;
     oss << std::put_time(&tm, "1%d-%m-%Y %H-%M-%S");
 
-    userForm.NickName = oss.str();
+    userForm.nickname = oss.str();
     user = postgres.AddUser(userForm);
-    EXPECT_EQ(user.NickName, userForm.NickName);
+    EXPECT_EQ(user.nickname, userForm.nickname);
     oss << std::put_time(&tm, "%2d-%m-%Y %H-%M-%S");
-    userForm.NickName = oss.str();
-    userForm.ProfileAvatar = "/image/image.png";
+    userForm.nickname = oss.str();
+    userForm.profile_avatar = "/image/image.png";
     user = postgres.AddUser(userForm);
-    EXPECT_EQ(user.NickName, userForm.NickName);
-    EXPECT_EQ(user.ProfileAvatar, userForm.ProfileAvatar);
+    EXPECT_EQ(user.nickname, userForm.nickname);
+    EXPECT_EQ(user.profile_avatar, userForm.profile_avatar);
 }
 
 TEST(DBLibTest, AddUserInvalidInputs) {
     PostgresDB postgres;
-    struct UserForm userForm;
+    UserForm userForm;
     EXPECT_THROW(postgres.AddUser(userForm), InvalidInputs);
-    userForm.ProfileAvatar = "/image/image.png";
+    userForm.profile_avatar = "/image/image.png";
     EXPECT_THROW(postgres.AddUser(userForm), InvalidInputs);
-    userForm.NickName = "";
+    userForm.nickname = "";
     EXPECT_THROW(postgres.AddUser(userForm), InvalidInputs);
 }
 
 TEST(DBLibTest, ExtractUserByIDTest) {
     PostgresDB postgres;
-    struct UserForm userForm;
-    struct User user1, user2;
+    UserForm userForm;
+    User user1, user2;
 
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
     std::ostringstream oss;
     oss << std::put_time(&tm, "%3d-%m-%Y %H-%M-%S");
 
-    userForm.NickName = oss.str();
-    userForm.ProfileAvatar = "/image/image.png";
+    userForm.nickname = oss.str();
+    userForm.profile_avatar = "/image/image.png";
     user1 = postgres.AddUser(userForm);
     user2 = postgres.ExtractUserByID(user1.id);
     EXPECT_EQ(user1.id, user2.id);
-    EXPECT_EQ(user1.NickName, user2.NickName);
-    EXPECT_EQ(user1.ProfileAvatar, user2.ProfileAvatar);
-    EXPECT_EQ(user1.CreatedAt, user2.CreatedAt);
+    EXPECT_EQ(user1.nickname, user2.nickname);
+    EXPECT_EQ(user1.profile_avatar, user2.profile_avatar);
+    EXPECT_EQ(user1.created_at, user2.created_at);
 }
 
 TEST(DBLibTest, ExtractUserByNickNameTest) {
     PostgresDB postgres;
-    struct UserForm userForm;
-    struct User user1, user2;
+    UserForm userForm;
+    User user1, user2;
 
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
     std::ostringstream oss;
     oss << std::put_time(&tm, "%4d-%m-%Y %H-%M-%S");
 
-    userForm.NickName = oss.str();
-    userForm.ProfileAvatar = "/image/image.png";
+    userForm.nickname = oss.str();
+    userForm.profile_avatar = "/image/image.png";
     user1 = postgres.AddUser(userForm);
-    user2 = postgres.ExtractUserByNickName(user1.NickName);
+    user2 = postgres.ExtractUserByNickName(user1.nickname);
     EXPECT_EQ(user1.id, user2.id);
-    EXPECT_EQ(user1.NickName, user2.NickName);
-    EXPECT_EQ(user1.ProfileAvatar, user2.ProfileAvatar);
-    EXPECT_EQ(user1.CreatedAt, user2.CreatedAt);
+    EXPECT_EQ(user1.nickname, user2.nickname);
+    EXPECT_EQ(user1.profile_avatar, user2.profile_avatar);
+    EXPECT_EQ(user1.created_at, user2.created_at);
 }
 
 // Далее предполагается что все необходимые значения уже хранятся в БД
 // TODO: реализовать скрипт, который формирует базу данных для тестов
 TEST(DBLibTest, AddChatValidInputs) {
     PostgresDB postgres;
-    struct ChatForm chatForm;
-    struct Chat chat;
-    std::vector<int> existingUsersID = {1, 2, 3, 4};
-    chatForm.ChatName = "chatname";
-    chatForm.UsersID = existingUsersID;
+    ChatForm chatForm;
+    Chat chat;
+    std::vector<unsigned long> existingUsersID = {1, 2, 3, 4};
+    chatForm.chat_name = "chatname";
+    chatForm.users_id = existingUsersID;
     EXPECT_NO_THROW(chat = postgres.AddChat(chatForm));
-    EXPECT_EQ(chatForm.ChatName, chat.ChatName);
-    EXPECT_EQ(chatForm.UsersID, chat.UsersID);
+    EXPECT_EQ(chatForm.chat_name, chat.chat_name);
+    EXPECT_EQ(chatForm.users_id, chat.users_id);
 }
 
 TEST(DBLibTest, AddChatInvalidInputs) {
     PostgresDB postgres;
-    struct ChatForm chatForm;
+    ChatForm chatForm;
     EXPECT_THROW(postgres.AddChat(chatForm), InvalidInputs);
-    chatForm.ChatName = "123";
+    chatForm.chat_name = "123";
     EXPECT_THROW(postgres.AddChat(chatForm), InvalidInputs);
 }
 
 TEST(DBLibTest, ExtractChatByIDTest) {
     PostgresDB postgres;
-    std::vector<int> chatUsersID = {1, 2, 3, 4};
-    int chatTotalMessages = 2;
+    std::vector<unsigned long> chatUsersID = {1, 2, 3, 4};
+    unsigned long chatTotalMessages = 2;
     Chat chat;
     EXPECT_NO_THROW(chat = postgres.ExtractChatByID(1));
-    EXPECT_EQ(chat.ChatName, "testChat");
-    EXPECT_EQ(chat.UsersID, chatUsersID);
-    EXPECT_EQ(chat.CreatedAt, "03-02-1998 13-15-07");
-    EXPECT_EQ(chat.TotalMessages, chatTotalMessages);
+    EXPECT_EQ(chat.chat_name, "testChat");
+    EXPECT_EQ(chat.users_id, chatUsersID);
+    EXPECT_EQ(chat.created_at, "03-02-1998 13-15-07");
+    EXPECT_EQ(chat.total_messages, chatTotalMessages);
     EXPECT_EQ(chat.id, 1);
 }
 
 TEST(DBLibTest, ExtractChatsIDByUserID) {
     PostgresDB postgres;
-    int UserIDTest = 5;
-    std::vector<int> userChatsTest = {1, 2, 3};
-    std::vector<int> userChats;
+    unsigned long UserIDTest = 5;
+    std::vector<unsigned long> userChatsTest = {1, 2, 3};
+    std::vector<unsigned long> userChats;
     EXPECT_NO_THROW(userChats = postgres.ExtractChatsIDByUserID(UserIDTest));
     EXPECT_EQ(userChatsTest, userChats);
 }
@@ -120,41 +121,41 @@ TEST(DBLibTest, ExtractChatsIDByUserID) {
 TEST(DBLibTest, AddMessageValidInputs) {
     PostgresDB postgres;
     MessageForm msgForm;
-    Message msg;
-    msgForm.SenderID = 1;
-    msgForm.ChatID = 1;
-    msgForm.Message = "msg";
+    message msg;
+    msgForm.sender_id = 1;
+    msgForm.chat_id = 1;
+    msgForm.message = "msg";
     EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
-    EXPECT_EQ(msgForm.SenderID, msg.SenderID);
-    EXPECT_EQ(msgForm.ChatID, msg.ChatID);
-    EXPECT_EQ(msgForm.Message, msg.Message);
-    EXPECT_EQ(msgForm.Attachment, msg.Attachment);
+    EXPECT_EQ(msgForm.sender_id, msg.sender_id);
+    EXPECT_EQ(msgForm.chat_id, msg.chat_id);
+    EXPECT_EQ(msgForm.message, msg.message);
+    EXPECT_EQ(msgForm.attachment, msg.attachment);
     std::vector<std::string> att = {"attachment1", "attachment2"};
-    msgForm.Attachment = att;
-    msgForm.Message = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    msgForm.attachment = att;
+    msgForm.message = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
     EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
-    EXPECT_EQ(msgForm.SenderID, msg.SenderID);
-    EXPECT_EQ(msgForm.ChatID, msg.ChatID);
-    EXPECT_EQ(msgForm.Message, msg.Message);
-    EXPECT_EQ(msgForm.Attachment, msg.Attachment);
+    EXPECT_EQ(msgForm.sender_id, msg.sender_id);
+    EXPECT_EQ(msgForm.chat_id, msg.chat_id);
+    EXPECT_EQ(msgForm.message, msg.message);
+    EXPECT_EQ(msgForm.attachment, msg.attachment);
 }
 
 TEST(DBLibTest, AddMessageInvalidInputs) {
     PostgresDB postgres;
     MessageForm msgForm;
-    Message msg;
+    message msg;
     EXPECT_THROW(msg = postgres.AddMessage(msgForm), InvalidInputs);
-    msgForm.SenderID = 1;
-    msgForm.ChatID = 1;
-    msgForm.Message = "";
+    msgForm.sender_id = 1;
+    msgForm.chat_id = 1;
+    msgForm.message = "";
     EXPECT_THROW(msg = postgres.AddMessage(msgForm), InvalidInputs);
 }
 
 TEST(DBLibTest, ExtractChatMessagesID) {
     PostgresDB postgres;
-    int chatIDTest = 4;
-    std::vector<int> msgID;
-    std::vector<int> msgIDTest = {2, 3, 10};
+    unsigned long chatIDTest = 4;
+    std::vector<unsigned long> msgID;
+    std::vector<unsigned long> msgIDTest = {2, 3, 10};
     EXPECT_NO_THROW(msgID = postgres.ExtractChatMessagesID(chatIDTest, 0, 3));
     EXPECT_EQ(msgIDTest, msgID);
     EXPECT_THROW(msgID = postgres.ExtractChatMessagesID(chatIDTest, 0, 0),
@@ -163,31 +164,31 @@ TEST(DBLibTest, ExtractChatMessagesID) {
 
 TEST(DBLibTest, ExtractMessageByID) {
     PostgresDB postgres;
-    int msgIDTest = 4;
-    Message msg, msgTest;
+    unsigned long msgIDTest = 4;
+    message msg, msgTest;
     msgTest.id = msgIDTest;
-    msgTest.SenderID = 1;
-    msgTest.ChatID = 2;
-    msgTest.Message = "TestMessage";
-    msgTest.Attachment = {"att1", "att2"};
-    msgTest.CreatedAt = "03-02-1998 13-15-07";
-    msgTest.NumInChat = 2;
+    msgTest.sender_id = 1;
+    msgTest.chat_id = 2;
+    msgTest.message = "TestMessage";
+    msgTest.attachment = {"att1", "att2"};
+    msgTest.created_at = "03-02-1998 13-15-07";
+    msgTest.num_in_chat = 2;
 
     EXPECT_NO_THROW(msg = postgres.ExtractMessageByID(msgIDTest));
     EXPECT_EQ(msgTest.id, msg.id);
-    EXPECT_EQ(msgTest.SenderID, msg.SenderID);
-    EXPECT_EQ(msgTest.ChatID, msg.ChatID);
-    EXPECT_EQ(msgTest.Message, msg.Message);
-    EXPECT_EQ(msgTest.Attachment, msg.Attachment);
-    EXPECT_EQ(msgTest.CreatedAt, msg.CreatedAt);
-    EXPECT_EQ(msgTest.NumInChat, msg.NumInChat);
+    EXPECT_EQ(msgTest.sender_id, msg.sender_id);
+    EXPECT_EQ(msgTest.chat_id, msg.chat_id);
+    EXPECT_EQ(msgTest.message, msg.message);
+    EXPECT_EQ(msgTest.attachment, msg.attachment);
+    EXPECT_EQ(msgTest.created_at, msg.created_at);
+    EXPECT_EQ(msgTest.num_in_chat, msg.num_in_chat);
 }
 
 TEST(DBLibTest, LastMessagesByUserID) {
     PostgresDB postgres;
-    int userIDTest = 4;
-    std::vector<int> msgTest = {5, 7, 10};
-    std::vector<int> msg;
+    unsigned long userIDTest = 4;
+    std::vector<unsigned long> msgTest = {5, 7, 10};
+    std::vector<unsigned long> msg;
 
     EXPECT_NO_THROW(msg = postgres.LastMessagesByUserID(userIDTest));
     EXPECT_EQ(msg, msgTest);

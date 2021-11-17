@@ -1,6 +1,5 @@
 #pragma once
 
-#include <exception>
 #include "db_interface.h"
 
 class PostgresDB : public IDataBase {
@@ -12,49 +11,25 @@ private:
 public:
     User AddUser(UserForm user) override;
 
-    User ExtractUserByID(int id) override;
+    User ExtractUserByID(unsigned long id) override;
 
-    User ExtractUserByNickName(std::string NickName) override;
+    User ExtractUserByNickName(std::string nickname) override;
 
     Chat AddChat(ChatForm chat) override;
 
-    Chat ExtractChatByID(int id) override;
+    Chat ExtractChatByID(unsigned long id) override;
 
-    std::vector<int> ExtractChatsIDByUserID(int id) override;
+    std::vector<unsigned long>
+    ExtractChatsIDByUserID(unsigned long id) override;
 
-    Message AddMessage(MessageForm msg) override;
+    message AddMessage(MessageForm msg) override;
 
-    std::vector<int> ExtractChatMessagesID(int chatID, int first, int last) override;
+    std::vector<unsigned long>
+    ExtractChatMessagesID(unsigned long chat_id, unsigned long first,
+                          unsigned long last) override;
 
-    Message ExtractMessageByID(int id) override;
+    message ExtractMessageByID(unsigned long id) override;
 
-    std::vector<int> LastMessagesByUserID(int id) override;
+    std::vector<unsigned long> LastMessagesByUserID(unsigned long id) override;
 
 };
-
-class NotImplemented : public std::exception {
-private:
-    std::string m_error;
-
-public:
-    NotImplemented(std::string error = "Function not yet implemented")
-            : m_error(error) {
-    }
-
-    const char *
-    what() const noexcept override { return m_error.c_str(); } // C++11 и выше
-};
-
-class InvalidInputs : public std::exception {
-private:
-    std::string m_error;
-
-public:
-    InvalidInputs(std::string error = "Invalid inputs")
-            : m_error(error) {
-    }
-
-    const char *
-    what() const noexcept override { return m_error.c_str(); } // C++11 и выше
-};
-
