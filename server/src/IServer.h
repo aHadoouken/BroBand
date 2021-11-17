@@ -1,0 +1,13 @@
+#pragma once
+
+class IServer {
+public:
+    virtual void Run() = 0;
+
+private:
+    virtual void StartAccept() = 0;
+
+    virtual void HandleAccept() = 0;
+
+    virtual void HandleStop() = 0;
+};
