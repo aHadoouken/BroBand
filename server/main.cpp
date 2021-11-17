@@ -10,5 +10,7 @@ int main() {
     catch (std::exception &ex) {
         std::cerr << "Something go wrong: " << ex.what() << std::endl;
     }
+
+    return 0;
 }
 
