@@ -50,14 +50,3 @@ jobs:
       with:
         clang-format-version: '13'
         check-path: 'detecting/src''detecting/include'
-        
-# Статический анализатор кода
-  cpp-check:
-    needs: build-project
-    name: Static code analysis
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - run: sudo apt-get -qq update
-    - run: sudo apt-get install cppcheck
-    - run: sudo cppcheck --enable=all --inconclusive --check-config --suppress=missingIncludeSystem -I detecting/include --language=c .detecting/src
