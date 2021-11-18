@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(MClient VERSION 0.1 LANGUAGES CXX)
+project(Client VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -36,21 +36,21 @@ set(PROJECT_SOURCES
         src//MainWindow.ui)
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(MClient MANUAL_FINALIZATION ${PROJECT_SOURCES})
+    qt_add_executable(Client MANUAL_FINALIZATION ${PROJECT_SOURCES})
 else ()
-    add_executable(MClient ${PROJECT_SOURCES})
+    add_executable(Client ${PROJECT_SOURCES})
 endif ()
 
-target_link_libraries(MClient PRIVATE ${Boost_LIBRARIES} Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(Client PRIVATE ${Boost_LIBRARIES} Qt${QT_VERSION_MAJOR}::Widgets)
 
-set_target_properties(MClient PROPERTIES
+set_target_properties(Client PROPERTIES
         MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
         MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
         )
 
 if (QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(MClient)
+    qt_finalize_executable(Client)
 endif ()
 
 
