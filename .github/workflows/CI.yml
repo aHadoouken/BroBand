@@ -48,7 +48,9 @@ jobs:
       - run: sudo apt-get install -y libgtest-dev
       - run: sudo apt-get install -y gcovr
       - run: sudo apt-get install -y lcov
-      - run: sudo apt-get install -y qt5-default qtbase5-examples qtdeclarative5-examples
+      - run: sudo apt-get install -y qt5-default
+      - run: sudo apt-get install -y qtcreator
+      - run: sudo apt-get install -y qtbase5-examples qtdeclarative5-examples
       - run: sudo apt-get install -y libboost-all-dev
       - run: sudo apt-get install libxcb-xinerama0
       - run: sudo wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz
