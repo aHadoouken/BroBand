@@ -1,0 +1,76 @@
+name: CI
+on: 
+  push:
+    branches: [ Client ]
+  pull_request:
+    branches: [ Client ]
+jobs:
+  build-project:
+    name: Build project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2 
+      - run: sudo apt-get install -y libgtest-dev
+      - run: sudo wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz
+      - run: sudo tar -xf release-1.7.0.tar.gz && rm -rf release-1.7.0.tar.gz
+      - run: cd googletest-release-1.7.0
+      - run: sudo cmake
+      - run: sudo make googletest-release-1.7.0
+      - run: sudo mkdir build && cd build && sudo cmake .. && sudo make
+  formatting-check:
+    needs: build-project
+    name: Format checking
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run clang-format style check.
+      uses: jidicula/clang-format-action@v4.2.0
+      with:
+        clang-format-version: '13'
+        check-path: '/src'
+  cpp-check:
+    needs: build-project
+    name: Static code analysis
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: sudo apt-get -qq update
+    - run: sudo apt-get install cppcheck
+    - run: sudo cppcheck --enable=all --inconclusive ./src
+  gcovr:
+    needs: build-project
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2 
+      - run: sudo apt-get install -y libgtest-dev
+      - run: sudo apt-get install -y gcovr
+      - run: sudo apt-get install -y lcov
+      - run: sudo wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz
+      - run: sudo tar -xf release-1.7.0.tar.gz && rm -rf release-1.7.0.tar.gz
+      - run: cd googletest-release-1.7.0
+      - run: sudo cmake
+      - run: sudo make googletest-release-1.7.0
+      - run: sudo mkdir build && cd build && sudo cmake .. && sudo make
+      - run: sudo ./Client
+      - run: sudo gcovr -r .. --html --html-details -o coverage.html
+      - uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: coverage.html
+  valgrind:
+    needs: [build-project, gcovr]
+    name: Valgrind
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo apt-get -qq update
+      - run: sudo apt-get install -y valgrind
+      - run: sudo apt-get install -y libgtest-dev
+      - run: sudo wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz
+      - run: sudo tar -xf release-1.7.0.tar.gz && rm -rf release-1.7.0.tar.gz
+      - run: cd googletest-release-1.7.0
+      - run: sudo cmake
+      - run: sudo make googletest-release-1.7.0
+      - run: sudo mkdir build && cd build && sudo cmake .. && sudo make
+      - run: sudo valgrind --tool=memcheck --leak-check=summary --track-origins=yes --leak-check=full --error-exitcode=1 chmod a+x ./build/Client
