@@ -4,7 +4,7 @@
 
 class Connection : IConnection {
 public:
-    void Start() override;
+    int Start() override;
 
 private:
     void DoRead() override;

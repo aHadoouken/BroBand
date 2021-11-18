@@ -4,7 +4,7 @@
 
 class Server : public IServer {
 public:
-    void Run() override;
+    int Run() override;
 
 private:
     void StartAccept() override;

@@ -2,7 +2,7 @@
 
 class IConnection {
 public:
-    virtual void Start() = 0;
+    virtual int Start() = 0;
 
 private:
     virtual void DoRead() = 0;

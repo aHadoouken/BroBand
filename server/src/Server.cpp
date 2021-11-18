@@ -13,6 +13,6 @@ void Server::HandleStop() {
     throw NotImplemented();
 }
 
-void Server::Run() {
+int Server::Run() {
     throw NotImplemented();
 }

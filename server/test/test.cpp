@@ -26,61 +26,78 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 TEST(SERVER_TEST, server) {
 
     Server s;
-    EXPECT_THROW(s.Run(), NotImplemented);
+
+    EXPECT_EQ(s.Run(), 0);
 }
 
 TEST(CONNECTION_TEST, connection) {
 
     Connection conn;
-    EXPECT_THROW(conn.Start(), NotImplemented);
+    EXPECT_EQ(conn.Start(), 0);
 }
 
 TEST(HANDLERS_TEST, AddChat) {
 
     Handlers hand;
-    http::request <http::string_body> request;
+    http::request<http::string_body> request;
+    http::response <http::string_body> response_real = hand.AddChat(request);
 
-    EXPECT_THROW(hand.AddChat(request), NotImplemented);
+
+    EXPECT_EQ((int)response_real.result(), 200);
+    EXPECT_EQ(response_real.body(), "");
+//    EXPECT_EQ(response_real.method_string(), "POST");                               //TODO: нужно выставить флаг is_request
+                                                                                      // https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/ref/boost__beast__http__response.html
+
 }
 
 TEST(HANDLERS_TEST, AddMessage) {
 
     Handlers hand;
-    http::request <http::string_body> request;
+    http::request<http::string_body> request;
+    http::response <http::string_body> response_real = hand.AddMessage(request);
 
-    EXPECT_THROW(hand.AddMessage(request), NotImplemented);
+    EXPECT_EQ((int)response_real.result(), 200);
+    EXPECT_EQ(response_real.body(), "");
 }
 
 TEST(HANDLERS_TEST, AddUser) {
 
     Handlers hand;
-    http::request <http::string_body> request;
+    http::request<http::string_body> request;
+    http::response <http::string_body> response_real = hand.AddUser(request);
 
-    EXPECT_THROW(hand.AddUser(request), NotImplemented);
+    EXPECT_EQ((int)response_real.result(), 200);
+    EXPECT_EQ(response_real.body(), "");
 }
 
 TEST(HANDLERS_TEST, GetChat) {
 
     Handlers hand;
-    http::request <http::string_body> request;
+    http::request<http::string_body> request;
+    http::response <http::string_body> response_real = hand.GetChat(request);
 
-    EXPECT_THROW(hand.GetChat(request), NotImplemented);
+    EXPECT_EQ((int)response_real.result(), 200);
+    EXPECT_EQ(response_real.body(), "");
 }
 
 TEST(HANDLERS_TEST, GetMessage) {
 
     Handlers hand;
-    http::request <http::string_body> request;
+    http::request<http::string_body> request;
+    http::response <http::string_body> response_real = hand.GetMessage(request);
 
-    EXPECT_THROW(hand.GetMessage(request), NotImplemented);
+    EXPECT_EQ((int)response_real.result(), 200);
+    EXPECT_EQ(response_real.body(), "");
 }
 
 TEST(HANDLERS_TEST, GetUser) {
 
     Handlers hand;
-    http::request <http::string_body> request;
+    http::request<http::string_body> request;
+    http::response <http::string_body> response_real = hand.GetUser(request);
 
-    EXPECT_THROW(hand.GetUser(request), NotImplemented);
+    EXPECT_EQ((int)response_real.result(), 200);
+    EXPECT_EQ(response_real.body(), "");
 }
 
 TEST(ROUTING_TEST, AddHandler) {

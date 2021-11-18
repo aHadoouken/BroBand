@@ -2,7 +2,7 @@
 
 class IServer {
 public:
-    virtual void Run() = 0;
+    virtual int Run() = 0;
 
 private:
     virtual void StartAccept() = 0;

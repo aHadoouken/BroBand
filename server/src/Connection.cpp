@@ -17,6 +17,6 @@ void Connection::DoClose() {
     throw NotImplemented();
 }
 
-void Connection::Start() {
+int Connection::Start() {
     throw NotImplemented();
 }
