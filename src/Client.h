@@ -28,9 +28,14 @@ class Client : public std::enable_shared_from_this<Client> {
     std::string host_;
     std::string text_;
 
+    User *user;
+    Chat *chat;
+    Message *msg;
+
    public:
-    explicit Client(net::io_context&);
-    void run(char const*, char const*, char const*);
+    explicit Client(net::io_context &);
+    ~Client();
+    void run(char const *, char const *, char const *);
 
    private:
     void onResolve(beast::error_code, tcp::resolver::results_type);

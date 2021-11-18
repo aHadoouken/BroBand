@@ -1,6 +1,10 @@
 #include "Chat.h"
 
-Chat::Chat() {}
+Chat::Chat() {
+    id = 0;
+    creatorId = 0;
+    name = " ";
+}
 
 void Chat::setId(uint64_t id) { this->id = id; }
 

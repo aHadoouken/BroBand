@@ -1,6 +1,12 @@
 #include "Message.h"
 
-Message::Message() {}
+Message::Message() {
+    id = 0;
+    text = " ";
+    senderId = 0;
+    chatId = 0;
+    hasAttachment = false;
+}
 
 void Message::setId(uint64_t id) { this->id = id; }
 

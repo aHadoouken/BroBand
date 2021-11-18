@@ -4,6 +4,12 @@ void fail(beast::error_code ec, char const* what) { std::cerr << what << ": " <<
 
 Client::Client(net::io_context& ioc) : resolver_(net::make_strand(ioc)), ws_(net::make_strand(ioc)) {}
 
+Client::~Client() {
+    delete user;
+    delete chat;
+    delete msg;
+}
+
 void Client::run(char const* host, char const* port, char const* text) {
     host_ = host;
     text_ = text;

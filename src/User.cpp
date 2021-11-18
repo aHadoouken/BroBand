@@ -1,6 +1,11 @@
 #include "User.h"
 
-User::User() {}
+User::User() {
+    id = 0;
+    login = " ";
+    name = " ";
+    status = " ";
+}
 
 void User::setId(uint64_t id) { this->id = id; }
 
