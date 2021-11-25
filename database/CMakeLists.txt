@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(mat_sum)
+project(DataBase)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -pthread")
 
@@ -13,11 +13,17 @@ include_directories(src)
 
 add_subdirectory(src)
 
+find_library(PQXX_LIB pqxx)
+find_library(PQ_LIB pq)
+
+add_executable(main.out main.cpp)
+target_link_libraries(main.out db_lib ${PQXX_LIB} ${PQ_LIB})
+
 enable_testing()
 find_package(GTest REQUIRED)
 
 include_directories(${GTEST_INCLUDE_DIRS})
 
 add_executable(tests.out tests/tests.cpp)
-target_link_libraries(tests.out ${GTEST_LIBRARIES} db_lib gcov)
+target_link_libraries(tests.out ${GTEST_LIBRARIES} db_lib ${PQXX_LIB} ${PQ_LIB} gcov)
 

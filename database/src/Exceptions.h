@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <string>
+#include <utility>
 
 class NotImplemented : public std::exception {
 private:
@@ -9,7 +10,7 @@ private:
 
 public:
     NotImplemented(std::string error = "Function not yet implemented")
-            : m_error(error) {}
+            : m_error(std::move(error)) {}
 
     const char *what() const noexcept override { return m_error.c_str(); }
 };
@@ -20,7 +21,7 @@ private:
 
 public:
     InvalidInputs(std::string error = "Invalid inputs")
-            : m_error(error) {
+            : m_error(std::move(error)) {
     }
 
     const char *what() const noexcept override { return m_error.c_str(); }

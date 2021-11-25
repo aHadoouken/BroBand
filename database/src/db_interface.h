@@ -3,13 +3,8 @@
 #include "structs.h"
 
 class IDataBase {
-private:
-    virtual bool OpenConnection() = 0;
-
-    virtual bool CloseConnection() = 0;
-
 public:
-    virtual User AddUser(UserForm user) = 0;
+    virtual User AddUser(UserForm userForm) = 0;
 
     virtual User ExtractUserByID(unsigned long id) = 0;
 
