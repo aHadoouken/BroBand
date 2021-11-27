@@ -12,7 +12,12 @@ add_link_options("--coverage")
 include_directories(src)
 
 add_subdirectory(src)
-add_subdirectory(test)
+add_subdirectory(tests)
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+find_package(Boost)
+include_directories(${Boost_INCLUDE_DIRS})
 
 add_executable(main.out main.cpp)
-target_link_libraries(main.out server_lib)
+target_link_libraries(main.out ${Boost_LIBRARIES} Threads::Threads server_lib)
