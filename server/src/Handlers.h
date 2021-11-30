@@ -7,6 +7,12 @@
 #include <boost/asio/strand.hpp>
 #include <boost/config.hpp>
 
+#include "db_implementation.h"
+
+#define AVATARS "/home/alex/Avatars/"
+#define IMAGES "/home/alex/Images/"
+#define DB_CONFIG "/home/alex/mail_cpp/Boost_test/db_config.cfg"
+
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
@@ -14,6 +20,8 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 class Handlers {
 public:
+    Handlers (): database(DB_CONFIG) {};
+
     http::response <http::string_body>
     AddUser(http::request <http::string_body> request);
 
@@ -32,4 +40,8 @@ public:
     http::response <http::string_body>
     GetMessage(http::request <http::string_body> request);
 
+private:
+    PostgresDB database;
+
+    std::string GetUserBody(User user);
 };

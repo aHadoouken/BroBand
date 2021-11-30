@@ -47,5 +47,4 @@ private:
 
     /// The number of threads that will call io_context::run().
     std::size_t thread_pool_size_;
-
 };

@@ -15,6 +15,7 @@
 #include <thread>
 #include <vector>
 
+#include "db_implementation.h"
 #include "Handlers.h"
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
@@ -41,11 +42,16 @@ private:
     void DoClose();
 
 private:
+    beast::tcp_stream stream_;
+
     Handlers &handlers_;
 
-    beast::tcp_stream stream_;
     beast::flat_buffer buffer_;
 
     http::request<http::string_body> request_;
+
     std::shared_ptr<void> res_;
+
+    void processAddUser(const http::request<http::string_body> &req,
+                        http::response<http::string_body> &res);
 };

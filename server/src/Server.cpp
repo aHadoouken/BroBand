@@ -45,7 +45,7 @@ void Server::StartAccept() {
 void Server::HandleAccept(beast::error_code e, tcp::socket socket) {
     if (!e)
     {
-        std::cout << "accept!";
+        std::cout << "accept!" << std::endl;
 
         auto c = std::make_shared<Connection>(std::move(socket), handlers);
         c->Start();

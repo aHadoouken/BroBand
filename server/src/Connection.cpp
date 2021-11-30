@@ -20,29 +20,48 @@ void Connection::DoRead() {
                              shared_from_this()));
 }
 
+void Connection::HandleWrite(bool close,
+                             beast::error_code e,
+                             std::size_t bytes_transferred) {
+    if (close) {
+        // This means we should close the connection, usually because
+        // the response indicated the "Connection: close" semantic.
+        return DoClose();
+    }
+
+    if (!e) {
+        DoRead();
+    }
+}
+
+void Connection::DoClose() {
+    beast::error_code ec;
+    stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
+}
+
 void Connection::HandleRead(beast::error_code e,
                             std::size_t bytes_transferred) {
-    if( e == http::error::end_of_stream)
+    if (e == http::error::end_of_stream)
         return DoClose();
 
-    if (!e)
-    {
-        http::response<http::string_body> res{http::status::bad_request, request_.version()};
-        if (request_.target() == "/add_user"){
-            res = handlers_.AddUser(request_);
-        }
-        else if (request_.target() == "/add_chat"){
+    if (!e) {
+        http::response<http::string_body> res{http::status::bad_request,
+                                              request_.version()};
+
+        if (request_.target() == "/add_user" &&
+            request_.method() == http::verb::post) {
+            processAddUser(request_, res);
+        } else if (request_.target() == "/add_chat") {
             res = handlers_.AddChat(request_);
-        }
-        else
-        {
+        } else {
             res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
             res.set(http::field::content_type, "application/json");
             res.result(http::status::not_found);
             res.body() = "Not found";
         }
 
-        auto sp = std::make_shared<http::message<false, http::string_body>>(std::move(res));
+        auto sp = std::make_shared<http::message<false, http::string_body>>(
+                std::move(res));
         res_ = sp;
 
         http::async_write(stream_,
@@ -54,24 +73,26 @@ void Connection::HandleRead(beast::error_code e,
     }
 }
 
-void Connection::HandleWrite(bool close,
-                             beast::error_code e,
-                             std::size_t bytes_transferred) {
-    if(close)
-    {
-        // This means we should close the connection, usually because
-        // the response indicated the "Connection: close" semantic.
-        return DoClose();
+void Connection::processAddUser(const http::request<http::string_body> &req,
+                                http::response<http::string_body> &res) {
+    try {
+        res = handlers_.AddUser(req);
     }
-
-    if (!e)
-    {
-        DoRead();
+    catch (pqxx::unique_violation &ex) {
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, "application/json");
+        res.result(http::status::method_not_allowed);
+        res.body() = ex.what();
+    }
+    catch (pqxx::failure &ex) {
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, "application/json");
+        res.result(http::status::service_unavailable);
+        res.body() = ex.what();
+    }
+    catch (std::exception &ex) {
+        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, "application/json");
+        res.body() = ex.what();
     }
 }
-
-void Connection::DoClose() {
-    beast::error_code ec;
-    stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
-}
-
