@@ -8,14 +8,11 @@ public:
 
     virtual User ExtractUserByID(unsigned long id) = 0;
 
-    virtual User ExtractUserByNickName(std::string nickname) = 0;
+    virtual User ExtractUserByNickName(const std::string &nickname) = 0;
 
-    virtual Chat AddChat(ChatForm chat) = 0;
+    virtual Chat AddChat(ChatForm chatForm) = 0;
 
     virtual Chat ExtractChatByID(unsigned long id) = 0;
-
-    virtual std::vector<unsigned long>
-    ExtractChatsIDByUserID(unsigned long id) = 0;
 
     virtual message AddMessage(MessageForm msg) = 0;
 

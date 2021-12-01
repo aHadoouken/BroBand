@@ -11,14 +11,11 @@ public:
 
     User ExtractUserByID(unsigned long id) override;
 
-    User ExtractUserByNickName(std::string nickname) override;
+    User ExtractUserByNickName(const std::string &nickname) override;
 
-    Chat AddChat(ChatForm chat) override;
+    Chat AddChat(ChatForm chatForm) override;
 
     Chat ExtractChatByID(unsigned long id) override;
-
-    std::vector<unsigned long>
-    ExtractChatsIDByUserID(unsigned long id) override;
 
     message AddMessage(MessageForm msg) override;
 
@@ -39,4 +36,11 @@ private:
 
     PostgresDB(const PostgresDB &);
 
+    void FillUserInfoWithoutChats(User &user, const pqxx::result &result);
+
+    void FillUserInfoChats(User &user, const pqxx::result &result);
+
+    void FillChatInfoWithoutUsers(Chat &chat, const pqxx::result &result);
+
+    void FillChatInfoUsers(Chat &chat, const pqxx::result &result);
 };

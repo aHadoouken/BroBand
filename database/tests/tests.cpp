@@ -3,13 +3,14 @@
 #include "Exceptions.h"
 #include "db_implementation.h"
 
+#define CONFIG "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg"
+
 // Перед запуском тестов необходимо запустить sql скрипт query.sql
 // Данный скрипт инициализирует ДБ для тестирования
 // TODO: сделать так, чтобы скрипт запускался автоматически
 
 TEST(DBLibTest, AddUserValidInputs) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
+    PostgresDB postgres(CONFIG);
     UserForm userForm;
     User user;
     userForm.nickname = "User1453";
@@ -28,8 +29,7 @@ TEST(DBLibTest, AddUserValidInputs) {
 }
 
 TEST(DBLibTest, AddUserInvalidInputs) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
+    PostgresDB postgres(CONFIG);
     UserForm userForm;
     EXPECT_THROW(postgres.AddUser(userForm), InvalidInputs);
     userForm.profile_avatar = "/image/image.png";
@@ -41,41 +41,35 @@ TEST(DBLibTest, AddUserInvalidInputs) {
 }
 
 TEST(DBLibTest, ExtractUserByIDTest) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
-    UserForm userForm;
-    User user1, user2;
-    userForm.nickname = "UserUser";
-    userForm.profile_avatar = "/image/image.png";
-    user1 = postgres.AddUser(userForm);
-    user2 = postgres.ExtractUserByID(user1.id);
-    EXPECT_EQ(user1.id, user2.id);
-    EXPECT_EQ(user1.nickname, user2.nickname);
-    EXPECT_EQ(user1.profile_avatar, user2.profile_avatar);
-    EXPECT_EQ(user1.created_at, user2.created_at);
+    PostgresDB postgres(CONFIG);
+    User user;
+    user = postgres.ExtractUserByID(1);
+    EXPECT_EQ(user.id, 1);
+    EXPECT_EQ(user.nickname, "user1");
+    EXPECT_TRUE(user.profile_avatar.empty());
+    std::vector<unsigned long> chats_id = {1, 2, 3};
+    EXPECT_EQ(user.chats_id, chats_id);
+    EXPECT_THROW(postgres.ExtractUserByID(42), pqxx::plpgsql_no_data_found);
 }
 
 TEST(DBLibTest, ExtractUserByNickNameTest) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
-    UserForm userForm;
-    User user1, user2;
-    userForm.nickname = "UserTest4";
-    userForm.profile_avatar = "/image/image.png";
-    user1 = postgres.AddUser(userForm);
-    user2 = postgres.ExtractUserByNickName(user1.nickname);
-    EXPECT_EQ(user1.id, user2.id);
-    EXPECT_EQ(user1.nickname, user2.nickname);
-    EXPECT_EQ(user1.profile_avatar, user2.profile_avatar);
-    EXPECT_EQ(user1.created_at, user2.created_at);
+    PostgresDB postgres(CONFIG);
+    User user;
+    user = postgres.ExtractUserByNickName("user1");
+    EXPECT_EQ(user.id, 1);
+    EXPECT_EQ(user.nickname, "user1");
+    EXPECT_TRUE(user.profile_avatar.empty());
+    std::vector<unsigned long> chats_id = {1, 2, 3};
+    EXPECT_EQ(user.chats_id, chats_id);
+    EXPECT_THROW(postgres.ExtractUserByNickName("user144"),
+                 pqxx::plpgsql_no_data_found);
 }
 
 TEST(DBLibTest, AddChatValidInputs) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
+    PostgresDB postgres(CONFIG);
     ChatForm chatForm;
     Chat chat;
-    std::vector<unsigned long> existingUsersID = {1, 2, 3, 4};
+    std::vector<unsigned long> existingUsersID = {1, 2, 3};
     chatForm.chat_name = "chatname";
     chatForm.users_id = existingUsersID;
     EXPECT_NO_THROW(chat = postgres.AddChat(chatForm));
@@ -84,41 +78,29 @@ TEST(DBLibTest, AddChatValidInputs) {
 }
 
 TEST(DBLibTest, AddChatInvalidInputs) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
+    PostgresDB postgres(CONFIG);
     ChatForm chatForm;
     EXPECT_THROW(postgres.AddChat(chatForm), InvalidInputs);
     chatForm.chat_name = "123";
     EXPECT_THROW(postgres.AddChat(chatForm), InvalidInputs);
+    chatForm.users_id = {456, 478};
+    EXPECT_THROW(postgres.AddChat(chatForm), pqxx::plpgsql_no_data_found);
 }
 
 TEST(DBLibTest, ExtractChatByIDTest) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
-    std::vector<unsigned long> chatUsersID = {1, 2, 3, 4};
-    unsigned long chatTotalMessages = 2;
+    PostgresDB postgres(CONFIG);
     Chat chat;
-    EXPECT_NO_THROW(chat = postgres.ExtractChatByID(1));
-    EXPECT_EQ(chat.chat_name, "testChat");
-    EXPECT_EQ(chat.users_id, chatUsersID);
-    EXPECT_EQ(chat.created_at, "03-02-1998 13-15-07");
-    EXPECT_EQ(chat.total_messages, chatTotalMessages);
+    chat = postgres.ExtractChatByID(1);
     EXPECT_EQ(chat.id, 1);
-}
-
-TEST(DBLibTest, ExtractChatsIDByUserID) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
-    unsigned long UserIDTest = 5;
-    std::vector<unsigned long> userChatsTest = {1, 2, 3};
-    std::vector<unsigned long> userChats;
-    EXPECT_NO_THROW(userChats = postgres.ExtractChatsIDByUserID(UserIDTest));
-    EXPECT_EQ(userChatsTest, userChats);
+    EXPECT_EQ(chat.chat_name, "chat1");
+    EXPECT_EQ(chat.total_messages, 10);
+    std::vector<unsigned long> users_id = {1, 2};
+    EXPECT_EQ(chat.users_id, users_id);
+    EXPECT_THROW(postgres.ExtractUserByID(402), pqxx::plpgsql_no_data_found);
 }
 
 TEST(DBLibTest, AddMessageValidInputs) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
+    PostgresDB postgres(CONFIG);
     MessageForm msgForm;
     message msg;
     msgForm.sender_id = 1;
@@ -140,8 +122,7 @@ TEST(DBLibTest, AddMessageValidInputs) {
 }
 
 TEST(DBLibTest, AddMessageInvalidInputs) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
+    PostgresDB postgres(CONFIG);
     MessageForm msgForm;
     message msg;
     EXPECT_THROW(msg = postgres.AddMessage(msgForm), InvalidInputs);
@@ -152,8 +133,7 @@ TEST(DBLibTest, AddMessageInvalidInputs) {
 }
 
 TEST(DBLibTest, ExtractChatMessagesID) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
+    PostgresDB postgres(CONFIG);
     unsigned long chatIDTest = 4;
     std::vector<unsigned long> msgID;
     std::vector<unsigned long> msgIDTest = {2, 3, 10};
@@ -164,8 +144,7 @@ TEST(DBLibTest, ExtractChatMessagesID) {
 }
 
 TEST(DBLibTest, ExtractMessageByID) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
+    PostgresDB postgres(CONFIG);
     unsigned long msgIDTest = 4;
     message msg, msgTest;
     msgTest.id = msgIDTest;
@@ -187,8 +166,7 @@ TEST(DBLibTest, ExtractMessageByID) {
 }
 
 TEST(DBLibTest, LastMessagesByUserID) {
-    PostgresDB postgres(
-            "/home/alex/mail_cpp/BroBand/database/tests/db_config.cfg");
+    PostgresDB postgres(CONFIG);
     unsigned long userIDTest = 4;
     std::vector<unsigned long> msgTest = {5, 7, 10};
     std::vector<unsigned long> msg;

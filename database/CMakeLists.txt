@@ -13,11 +13,13 @@ include_directories(src)
 
 add_subdirectory(src)
 
+find_package(Boost)
+include_directories(${Boost_INCLUDE_DIRS})
 find_library(PQXX_LIB pqxx)
 find_library(PQ_LIB pq)
 
 add_executable(main.out main.cpp)
-target_link_libraries(main.out db_lib ${PQXX_LIB} ${PQ_LIB})
+target_link_libraries(main.out ${Boost_LIBRARIES} db_lib ${PQXX_LIB} ${PQ_LIB})
 
 enable_testing()
 find_package(GTest REQUIRED)
@@ -25,5 +27,5 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 add_executable(tests.out tests/tests.cpp)
-target_link_libraries(tests.out ${GTEST_LIBRARIES} db_lib ${PQXX_LIB} ${PQ_LIB} gcov)
+target_link_libraries(tests.out ${GTEST_LIBRARIES} ${Boost_LIBRARIES} db_lib ${PQXX_LIB} ${PQ_LIB} gcov)
 
