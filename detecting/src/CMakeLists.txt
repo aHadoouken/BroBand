@@ -6,7 +6,7 @@ project(detecting_service)
 
 add_compile_options(-pthread)
 
-set(CMAKE_PREFIX_PATH "/home/runner/work/BroBand/detecting/libtorch")
+set(CMAKE_PREFIX_PATH "/home/runner/work/BroBand/BroBand/detecting/libtorch")
 
 # добавляем поиск файлов в директории include
 include_directories("../include")
