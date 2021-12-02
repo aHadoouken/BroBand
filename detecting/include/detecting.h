@@ -7,9 +7,17 @@
 
 #include <iostream>
 #include <vector>
+#include <torch/script.h>
+#include <opencv2/opencv.hpp>
 
 struct Probability {
-    std::vector<double> predict_proba;
+
+    double porn;
+
+    Probability() : porn(0) {}
+
+public:
+    friend std::ostream& operator<<(std::ostream& out, const Probability &prob);
 };
 
 struct Message {
@@ -40,37 +48,39 @@ struct ImageWrapper {
 
 template<typename T>
 class TorchWrapper {
-private:
-    std::string saved_model = "";
+protected:
+    torch::jit::script::Module model;
     double threshold = 0.5;
     Probability prob;
 
 public:
-    virtual int set_threshold(double _threshold) = 0;
+    virtual Probability forward(T data) = 0;
 
-    virtual int load_model(std::string path) = 0;
+    virtual int load_model(const std::string& path) = 0;
 
-    virtual Probability forward(T *data) = 0;
+    int set_threshold(double _threshold);
 };
 
-class PornImageDetector : TorchWrapper<Image> {
+class PornImageDetector : TorchWrapper<torch::Tensor> {
 public:
-    int set_threshold(double _threshold) override;
 
-    int load_model(std::string path) override;
+    int load_model(const std::string& path) override;
 
-    Probability forward(Image *data) override;
+    cv::Mat load_img(const std::string& path);
 
-    ImageWrapper *blurring(Image *data);
+    torch::Tensor preproccesing(cv::Mat img);
+
+    Probability forward(torch::Tensor data) override;
+
+    ImageWrapper *blurring(torch::Tensor data);
 };
 
 class PornTextDetector : TorchWrapper<Message> {
 public:
-    int set_threshold(double _threshold) override;
 
-    int load_model(std::string path) override;
+    Probability forward(Message data) override;
 
-    Probability forward(Message *data) override;
+    std::string preproccesing(std::string& text);
 
     MessageWrapper *text_replace(Message *data);
 };
