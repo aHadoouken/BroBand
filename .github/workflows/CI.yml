@@ -14,7 +14,7 @@ jobs:
       - run: cd detecting && sudo unzip libtorch-shared-with-deps-latest.zip
       - run: cd detecting && git clone https://github.com/opencv/opencv.git
       - run: cd detecting && git clone https://github.com/opencv/opencv_contrib.git
-      - run: cd detecting && cd opencv && mkdir build && cd build && sudo cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_GENERATE_PKGCONFIG=ON -D OPENCV_EXTRA_MODULES_PATH=/home/runner/work/BroBand/BroBand/detecting/opencv_contrib/modules .. && sudo make
+      - run: cd detecting && cd opencv && mkdir build && cd build && sudo cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_GENERATE_PKGCONFIG=ON .. && sudo make # -D OPENCV_EXTRA_MODULES_PATH=/home/runner/work/BroBand/BroBand/detecting/opencv_contrib/modules
       - run: sudo wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz
       - run: sudo tar -xf release-1.7.0.tar.gz && rm -rf release-1.7.0.tar.gz
       - run: cd googletest-release-1.7.0
