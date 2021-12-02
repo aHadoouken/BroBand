@@ -19,7 +19,7 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
-include_directories("../libopencv/include")
+include_directories("../opencv/include")
 
 #add_compile_options(-g -O0 -Wextra -Wall -Wextra -Wpedantic -lgcov --coverage)
 #add_link_options( -O0 -lgcov --coverage)
