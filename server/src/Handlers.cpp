@@ -49,7 +49,7 @@ std::string Handlers::GetUserBody(User user) {
     return json::serialize(responseValue);
 }
 
-std::string Handlers::GetChatBody(Chat chat){
+std::string Handlers::GetChatBody(Chat chat) {
     json::value responseValue = {
             {"chat",
              {
@@ -97,9 +97,11 @@ Handlers::AddUser(http::request<http::string_body> request) {
     std::string responseBody = GetUserBody(user);
 
     response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+    response.set(http::field::content_length, std::to_string(responseBody.size()));
     response.set(http::field::content_type, "application/json");
     response.result(http::status::ok);
     response.body() = responseBody;
+
     return response;
 }
 
@@ -112,13 +114,15 @@ Handlers::AddChat(http::request<http::string_body> request) {
 
     ChatForm chatForm;
     chatForm.chat_name = json::value_to<std::string>(obj.at("chat_name"));
-    chatForm.users_id = json::value_to<std::vector<unsigned long>>(obj.at("users_id"));
+    chatForm.users_id = json::value_to<std::vector<unsigned long>>(
+            obj.at("users_id"));
 
     auto chat = database.AddChat(chatForm);
 
     std::string responseBody = GetChatBody(chat);
 
     response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+    response.set(http::field::content_length, std::to_string(responseBody.size()));
     response.set(http::field::content_type, "application/json");
     response.result(http::status::ok);
     response.body() = responseBody;
@@ -138,13 +142,12 @@ Handlers::GetUser(http::request<http::string_body> request) {
     auto name = params.substr(0, params.find('='));
     auto value = params.substr(params.find('=') + 1);
     User user;
-    if (name == "id"){
+    if (name == "id") {
         auto user_id = std::stoul(value);
         user = database.ExtractUserByID(user_id);
-    } else if(name == "nickname"){
+    } else if (name == "nickname") {
         user = database.ExtractUserByNickName(value);
-    }
-    else{
+    } else {
         throw InvalidInputs();
     }
 
@@ -152,6 +155,7 @@ Handlers::GetUser(http::request<http::string_body> request) {
 
     http::response<http::string_body> response;
     response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+    response.set(http::field::content_length, std::to_string(responseBody.size()));
     response.set(http::field::content_type, "application/json");
     response.result(http::status::ok);
     response.body() = responseBody;
@@ -172,6 +176,7 @@ Handlers::GetChat(http::request<http::string_body> request) {
 
     http::response<http::string_body> response;
     response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+    response.set(http::field::content_length, std::to_string(responseBody.size()));
     response.set(http::field::content_type, "application/json");
     response.result(http::status::ok);
     response.body() = responseBody;
