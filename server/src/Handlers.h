@@ -44,4 +44,6 @@ private:
     PostgresDB database;
 
     std::string GetUserBody(User user);
+
+    std::string GetChatBody(Chat chat);
 };

@@ -52,6 +52,4 @@ private:
 
     std::shared_ptr<void> res_;
 
-    void processAddUser(const http::request<http::string_body> &req,
-                        http::response<http::string_body> &res);
 };

@@ -49,6 +49,21 @@ std::string Handlers::GetUserBody(User user) {
     return json::serialize(responseValue);
 }
 
+std::string Handlers::GetChatBody(Chat chat){
+    json::value responseValue = {
+            {"chat",
+             {
+                     {"chat_id", chat.id},
+                     {"chat_name", chat.chat_name},
+                     {"created_at", chat.created_at},
+                     {"total_messages", chat.total_messages},
+                     {"users_id", json::value_from(chat.users_id)}
+             }
+            }
+    };
+    return json::serialize(responseValue);
+}
+
 http::response<http::string_body>
 Handlers::AddUser(http::request<http::string_body> request) {
     http::response<http::string_body> response;
@@ -61,22 +76,23 @@ Handlers::AddUser(http::request<http::string_body> request) {
     UserForm userForm;
     userForm.nickname = nickname;
     if (!avatarBase64.empty()) {
+        userForm.profile_avatar = AVATARS + nickname + ".png";
+    } else {
+        userForm.profile_avatar = "";
+    }
+
+    auto user = database.AddUser(userForm);
+    // Сохраняем картинку после добавления юзера
+    if (!avatarBase64.empty()) {
         std::string avatarBinary;
         size_t size = beast::detail::base64::decoded_size(avatarBase64.size());
         avatarBinary.resize(size);
         beast::detail::base64::decode((void *) avatarBinary.data(),
                                       avatarBase64.data(),
                                       avatarBase64.size());
-        std::string ofilePath = AVATARS + nickname + ".png";
-        std::ofstream file(ofilePath);
+        std::ofstream file(userForm.profile_avatar);
         file.write(avatarBinary.data(), size);
-
-        userForm.profile_avatar = ofilePath;
-    } else {
-        userForm.profile_avatar = "";
     }
-
-    auto user = database.AddUser(userForm);
 
     std::string responseBody = GetUserBody(user);
 
@@ -89,7 +105,24 @@ Handlers::AddUser(http::request<http::string_body> request) {
 
 http::response<http::string_body>
 Handlers::AddChat(http::request<http::string_body> request) {
-    throw NotImplemented();
+    http::response<http::string_body> response;
+    json::value jv = json::parse(request.body());
+    json::object const &obj = jv.as_object();
+    jv = obj.at("chat");
+
+    ChatForm chatForm;
+    chatForm.chat_name = json::value_to<std::string>(obj.at("chat_name"));
+    chatForm.users_id = json::value_to<std::vector<unsigned long>>(obj.at("users_id"));
+
+    auto chat = database.AddChat(chatForm);
+
+    std::string responseBody = GetChatBody(chat);
+
+    response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+    response.set(http::field::content_type, "application/json");
+    response.result(http::status::ok);
+    response.body() = responseBody;
+    return response;
 }
 
 http::response<http::string_body>
@@ -99,12 +132,50 @@ Handlers::AddMessage(http::request<http::string_body> request) {
 
 http::response<http::string_body>
 Handlers::GetUser(http::request<http::string_body> request) {
-    throw NotImplemented();
+    std::string tar = static_cast<std::string>(request.target());
+    auto delimiterPos = tar.find('?');
+    std::string params = tar.substr(delimiterPos + 1);
+    auto name = params.substr(0, params.find('='));
+    auto value = params.substr(params.find('=') + 1);
+    User user;
+    if (name == "id"){
+        auto user_id = std::stoul(value);
+        user = database.ExtractUserByID(user_id);
+    } else if(name == "nickname"){
+        user = database.ExtractUserByNickName(value);
+    }
+    else{
+        throw InvalidInputs();
+    }
+
+    std::string responseBody = GetUserBody(user);
+
+    http::response<http::string_body> response;
+    response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+    response.set(http::field::content_type, "application/json");
+    response.result(http::status::ok);
+    response.body() = responseBody;
+    return response;
 }
 
 http::response<http::string_body>
 Handlers::GetChat(http::request<http::string_body> request) {
-    throw NotImplemented();
+    std::string tar = static_cast<std::string>(request.target());
+    auto delimiterPos = tar.find('?');
+    std::string params = tar.substr(delimiterPos + 1);
+    auto name = params.substr(0, params.find('='));
+    auto value = params.substr(params.find('=') + 1);
+    auto chat_id = std::stoul(value);
+    auto chat = database.ExtractChatByID(chat_id);
+
+    std::string responseBody = GetChatBody(chat);
+
+    http::response<http::string_body> response;
+    response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+    response.set(http::field::content_type, "application/json");
+    response.result(http::status::ok);
+    response.body() = responseBody;
+    return response;
 }
 
 http::response<http::string_body>

@@ -47,17 +47,51 @@ void Connection::HandleRead(beast::error_code e,
     if (!e) {
         http::response<http::string_body> res{http::status::bad_request,
                                               request_.version()};
+        try {
+            std::string req_tar = static_cast<std::string>(request_.target());
+            auto delimiterPos = req_tar.find('?');
+            auto target = req_tar.substr(0, delimiterPos);
 
-        if (request_.target() == "/add_user" &&
-            request_.method() == http::verb::post) {
-            processAddUser(request_, res);
-        } else if (request_.target() == "/add_chat") {
-            res = handlers_.AddChat(request_);
-        } else {
+            if (target == "/add_user" &&
+                request_.method() == http::verb::post) {
+                res = handlers_.AddUser(request_);
+            } else if (target == "/add_chat" &&
+                       request_.method() == http::verb::post) {
+                res = handlers_.AddChat(request_);
+            } else if (target == "/user_info" &&
+                       request_.method() == http::verb::get) {
+                res = handlers_.GetUser(request_);
+            } else if (target == "/chat_info" &&
+                       request_.method() == http::verb::get) {
+                res = handlers_.GetChat(request_);
+            } else {
+                res.set(http::field::content_type, "application/json");
+                res.result(http::status::not_found);
+                res.body() = "Not found";
+            }
+        }
+        catch (pqxx::unique_violation &ex) {
+            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+            res.set(http::field::content_type, "application/json");
+            res.result(http::status::method_not_allowed);
+            res.body() = ex.what();
+        }
+        catch (pqxx::plpgsql_no_data_found &ex) {
             res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
             res.set(http::field::content_type, "application/json");
             res.result(http::status::not_found);
-            res.body() = "Not found";
+            res.body() = ex.what();
+        }
+        catch (pqxx::failure &ex) {
+            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+            res.set(http::field::content_type, "application/json");
+            res.result(http::status::service_unavailable);
+            res.body() = ex.what();
+        }
+        catch (std::exception &ex) {
+            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+            res.set(http::field::content_type, "application/json");
+            res.body() = ex.what();
         }
 
         auto sp = std::make_shared<http::message<false, http::string_body>>(
@@ -70,29 +104,5 @@ void Connection::HandleRead(beast::error_code e,
                                   &Connection::HandleWrite,
                                   shared_from_this(),
                                   sp->need_eof()));
-    }
-}
-
-void Connection::processAddUser(const http::request<http::string_body> &req,
-                                http::response<http::string_body> &res) {
-    try {
-        res = handlers_.AddUser(req);
-    }
-    catch (pqxx::unique_violation &ex) {
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, "application/json");
-        res.result(http::status::method_not_allowed);
-        res.body() = ex.what();
-    }
-    catch (pqxx::failure &ex) {
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, "application/json");
-        res.result(http::status::service_unavailable);
-        res.body() = ex.what();
-    }
-    catch (std::exception &ex) {
-        res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-        res.set(http::field::content_type, "application/json");
-        res.body() = ex.what();
     }
 }
