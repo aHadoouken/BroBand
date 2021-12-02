@@ -6,9 +6,9 @@
 #define BROBAND_DETECTING_H
 
 #include <iostream>
-#include <vector>
-#include <torch/script.h>
 #include <opencv2/opencv.hpp>
+#include <torch/script.h>
+#include <vector>
 
 struct Probability {
 
@@ -17,7 +17,7 @@ struct Probability {
     Probability() : porn(0) {}
 
 public:
-    friend std::ostream& operator<<(std::ostream& out, const Probability &prob);
+    friend std::ostream &operator<<(std::ostream &out, const Probability &prob);
 };
 
 struct Message {
@@ -56,17 +56,16 @@ protected:
 public:
     virtual Probability forward(T data) = 0;
 
-    virtual int load_model(const std::string& path) = 0;
+    virtual int load_model(const std::string &path) = 0;
 
     int set_threshold(double _threshold);
 };
 
 class PornImageDetector : TorchWrapper<torch::Tensor> {
 public:
+    int load_model(const std::string &path) override;
 
-    int load_model(const std::string& path) override;
-
-    cv::Mat load_img(const std::string& path);
+    cv::Mat load_img(const std::string &path);
 
     torch::Tensor preproccesing(cv::Mat img);
 
@@ -77,10 +76,9 @@ public:
 
 class PornTextDetector : TorchWrapper<Message> {
 public:
-
     Probability forward(Message data) override;
 
-    std::string preproccesing(std::string& text);
+    std::string preproccesing(std::string &text);
 
     MessageWrapper *text_replace(Message *data);
 };
