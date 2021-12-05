@@ -38,7 +38,9 @@ int PornImageDetector::load_model(const std::string &path) {
 
     try {
         model = torch::jit::load(path);
-    } catch (const c10::Error &ex) {// Error - основной класс ошибок
+
+     // Error - основной класс ошибок
+    } catch (const c10::Error &ex) {
 
         std::cerr << "Error loading the model\n";
         return 1;
@@ -48,13 +50,14 @@ int PornImageDetector::load_model(const std::string &path) {
     return 0;
 }
 
-Probability PornImageDetector::forward(torch::Tensor img) {
+Probability PornImageDetector::forward(torch::Tensor *img) {
 
     torch::NoGradGuard no_grad;// turn off trainable function
 
-    torch::Tensor output = model.forward({img}).toTensor();
+    torch::Tensor output = model.forward({*img}).toTensor();
 
-    torch::Tensor softmax_output = torch::softmax(output, 1);// вектор вероятностей принадлежности классам size = 2
+    // вектор вероятностей принадлежности классам size = 2
+    torch::Tensor softmax_output = torch::softmax(output, 1);
 
     std::tuple<torch::Tensor, torch::Tensor> result = torch::max(softmax_output, 1);
 
@@ -70,62 +73,81 @@ Probability PornImageDetector::forward(torch::Tensor img) {
     return probability;
 }
 
-ImageWrapper *PornImageDetector::blurring(torch::Tensor data) {
-
-    cv::Mat img = load_img("../../test.jpg");
+ImageWrapper *PornImageDetector::blurring() {
 
     if (prob.porn > threshold) {
-        cv::GaussianBlur(img, img, cv::Size(35, 35), 0);
+        cv::GaussianBlur(orig_img, orig_img, cv::Size(31, 31), 0);
     }
 
-    cv::imwrite("../../2014.jpg", img);
+    cv::imwrite("../../2015.jpg", orig_img);
 }
 
-cv::Mat PornImageDetector::load_img(const std::string &path) {
+void PornImageDetector::permutation_channels(cv::Mat *img) {
 
-    cv::Mat img = cv::imread(path);
-    cv::Size target_size(WIDTH, HEIGHT);// так как вход сети 224 х 224
-    cv::resize(img, img, target_size);
-
-    switch (img.channels()) {// каналы изображения
+    // каналы изображения
+    switch (img->channels()) {
 
         case 4:
-            cv::cvtColor(img, img, cv::COLOR_BGRA2RGB);
+            cv::cvtColor(*img, *img, cv::COLOR_BGRA2RGB);
             break;
 
         case 3:
-            cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
+            cv::cvtColor(*img, *img, cv::COLOR_BGR2RGB);
             break;
 
         case 1:
-            cv::cvtColor(img, img, cv::COLOR_GRAY2RGB);
+            cv::cvtColor(*img, *img, cv::COLOR_GRAY2RGB);
             break;
 
         default:
             throw std::runtime_error("Incorrect image depth!");
     }
+}
+
+cv::Mat PornImageDetector::load_img(const std::string &path) {
+
+    // с этим объектом будут происходить манипуляции
+    cv::Mat img = cv::imread(path);
+
+    // этот объект блюрим --- оригинал
+    orig_img = cv::imread(path);
+
+    try {
+
+        // BGR to RGB
+        permutation_channels(&img);
+    } catch (const std::runtime_error &ex) {
+
+        // если не получилось, работаем с BGR
+        std::cout << "Using BGR format for image\n";
+    }
 
     return img;
 }
 
-torch::Tensor PornImageDetector::preproccesing(cv::Mat img) {
+torch::Tensor PornImageDetector::preproccesing(cv::Mat *img) {
 
-    img.convertTo(img, CV_32FC3, 1 / 255.0);
+    // так как вход сети 224 х 224 кропаем изображение
+    cv::Size target_size(WIDTH, HEIGHT);
+    cv::resize(*img, *img, target_size);
 
-    torch::Tensor img_tensor = torch::from_blob(img.data,
-                                                {img.rows, img.cols, img.channels()},
+    img->convertTo(*img, CV_32FC3, 1 / 255.0);
+
+    torch::Tensor img_tensor = torch::from_blob(img->data,
+                                                {img->rows, img->cols, img->channels()},
                                                 c10::kFloat);
 
     img_tensor = img_tensor.permute({2, 0, 1});
 
-    img_tensor.unsqueeze_(0);// добавляем фиктивную ось в тензор (will be dim = 4)
+    // добавляем фиктивную ось в тензор (will be dim = 4)
+    img_tensor.unsqueeze_(0);
 
     //    img_tensor = torch::data::transforms::Normalize<>(MEAN, STD)(img_tensor);
 
     return img_tensor.clone();
 }
 
-Probability PornTextDetector::forward(Message data) {
+Probability PornTextDetector::forward(Message *data) {
     throw NotImplemented();
 }
 
