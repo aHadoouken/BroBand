@@ -21,6 +21,7 @@ jobs:
       - run: cd googletest-release-1.7.0
       - run: sudo cmake
       - run: sudo make googletest-release-1.7.0
+      - run: ls
       - run: cd detecting && sudo mkdir build && cd build && sudo cmake .. && sudo make
 
 # покрытие
