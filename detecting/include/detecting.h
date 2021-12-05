@@ -33,12 +33,8 @@ struct MessageWrapper {
     MessageWrapper() : msg(nullptr), sender_id(0), chat_id(0), is_replace(false) {}
 };
 
-struct Image {
-    std::vector<double> data;
-};
-
 struct ImageWrapper {
-    Image *img;
+    cv::Mat *img;
     size_t sender_id;
     size_t chat_id;
     bool is_blur;
@@ -54,7 +50,7 @@ protected:
     Probability prob;
 
 public:
-    virtual Probability forward(T data) = 0;
+    virtual Probability forward(T *data) = 0;
 
     virtual int load_model(const std::string &path) = 0;
 
@@ -62,21 +58,26 @@ public:
 };
 
 class PornImageDetector : TorchWrapper<torch::Tensor> {
+private:
+    cv::Mat orig_img;
+
 public:
     int load_model(const std::string &path) override;
 
     cv::Mat load_img(const std::string &path);
 
-    torch::Tensor preproccesing(cv::Mat img);
+    void permutation_channels(cv::Mat *img);
 
-    Probability forward(torch::Tensor data) override;
+    torch::Tensor preproccesing(cv::Mat *img);
 
-    ImageWrapper *blurring(torch::Tensor data);
+    Probability forward(torch::Tensor *data) override;
+
+    ImageWrapper *blurring();
 };
 
 class PornTextDetector : TorchWrapper<Message> {
 public:
-    Probability forward(Message data) override;
+    Probability forward(Message* data) override;
 
     std::string preproccesing(std::string &text);
 
