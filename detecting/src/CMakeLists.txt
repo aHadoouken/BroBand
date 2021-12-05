@@ -14,6 +14,7 @@ include_directories("../include")
 include_directories("../libtorch/include")
 find_package(Torch REQUIRED)
 
+set(CMAKE_PREFIX_PATH "/home/runner/work/BroBand/BroBand/detecting/opencvlib")
 find_package(OpenCV REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
