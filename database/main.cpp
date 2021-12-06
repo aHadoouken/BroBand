@@ -33,6 +33,14 @@ int main() {
         chatForm.chat_name = "chatname";
         chatForm.users_id = existingUsersID;
         chat = db.AddChat(chatForm);
+
+
+        MessageForm msgForm;
+        Message msg;
+        msgForm.sender_id = 1;
+        msgForm.chat_id = 1;
+        msgForm.message = "msg";
+        msg = db.AddMessage(msgForm);
     }
     catch (pqxx::plpgsql_no_data_found &ex) {
         std::cerr << "Something go wrong1: " << ex.what() << std::endl;

@@ -102,7 +102,7 @@ TEST(DBLibTest, ExtractChatByIDTest) {
 TEST(DBLibTest, AddMessageValidInputs) {
     PostgresDB postgres(CONFIG);
     MessageForm msgForm;
-    message msg;
+    Message msg;
     msgForm.sender_id = 1;
     msgForm.chat_id = 1;
     msgForm.message = "msg";
@@ -111,9 +111,17 @@ TEST(DBLibTest, AddMessageValidInputs) {
     EXPECT_EQ(msgForm.chat_id, msg.chat_id);
     EXPECT_EQ(msgForm.message, msg.message);
     EXPECT_EQ(msgForm.attachment, msg.attachment);
-    std::vector<std::string> att = {"attachment1", "attachment2"};
-    msgForm.attachment = att;
-    msgForm.message = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    msgForm.attachment = "attachment";
+    msgForm.message = "";
+    EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
+    EXPECT_EQ(msgForm.sender_id, msg.sender_id);
+    EXPECT_EQ(msgForm.chat_id, msg.chat_id);
+    EXPECT_EQ(msgForm.message, msg.message);
+    EXPECT_EQ(msgForm.attachment, msg.attachment);
+    msgForm.sender_id = 4;
+    msgForm.chat_id = 2;
+    msgForm.attachment = "attachment";
+    msgForm.message = "msg2";
     EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
     EXPECT_EQ(msgForm.sender_id, msg.sender_id);
     EXPECT_EQ(msgForm.chat_id, msg.chat_id);
@@ -124,12 +132,20 @@ TEST(DBLibTest, AddMessageValidInputs) {
 TEST(DBLibTest, AddMessageInvalidInputs) {
     PostgresDB postgres(CONFIG);
     MessageForm msgForm;
-    message msg;
+    Message msg;
     EXPECT_THROW(msg = postgres.AddMessage(msgForm), InvalidInputs);
     msgForm.sender_id = 1;
     msgForm.chat_id = 1;
     msgForm.message = "";
     EXPECT_THROW(msg = postgres.AddMessage(msgForm), InvalidInputs);
+    msgForm.sender_id = 1000222;
+    msgForm.message = "123123";
+    EXPECT_THROW(msg = postgres.AddMessage(msgForm), pqxx::plpgsql_no_data_found);
+    msgForm.sender_id = 3;
+    msgForm.chat_id = 1;
+    EXPECT_THROW(msg = postgres.AddMessage(msgForm), InvalidInputs);
+    msgForm.chat_id = 10000;
+    EXPECT_THROW(msg = postgres.AddMessage(msgForm), pqxx::plpgsql_no_data_found);
 }
 
 TEST(DBLibTest, ExtractChatMessagesID) {
@@ -146,14 +162,13 @@ TEST(DBLibTest, ExtractChatMessagesID) {
 TEST(DBLibTest, ExtractMessageByID) {
     PostgresDB postgres(CONFIG);
     unsigned long msgIDTest = 4;
-    message msg, msgTest;
+    Message msg, msgTest;
     msgTest.id = msgIDTest;
     msgTest.sender_id = 1;
     msgTest.chat_id = 2;
     msgTest.message = "TestMessage";
     msgTest.attachment = {"att1", "att2"};
     msgTest.created_at = "03-02-1998 13-15-07";
-    msgTest.num_in_chat = 2;
 
     EXPECT_NO_THROW(msg = postgres.ExtractMessageByID(msgIDTest));
     EXPECT_EQ(msgTest.id, msg.id);
@@ -162,7 +177,6 @@ TEST(DBLibTest, ExtractMessageByID) {
     EXPECT_EQ(msgTest.message, msg.message);
     EXPECT_EQ(msgTest.attachment, msg.attachment);
     EXPECT_EQ(msgTest.created_at, msg.created_at);
-    EXPECT_EQ(msgTest.num_in_chat, msg.num_in_chat);
 }
 
 TEST(DBLibTest, LastMessagesByUserID) {

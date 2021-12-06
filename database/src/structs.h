@@ -29,19 +29,18 @@ typedef struct ChatForm {
     std::vector<unsigned long> users_id;
 } ChatForm;
 
-typedef struct message {
+typedef struct Message {
     unsigned long id;
     unsigned long sender_id;
     unsigned long chat_id;
     std::string message;
-    std::vector<std::string> attachment;
+    std::string attachment;
     std::string created_at;
-    unsigned long num_in_chat;
-} message;
+} Message;
 
 typedef struct MessageForm {
     unsigned long sender_id;
     unsigned long chat_id;
     std::string message;
-    std::vector<std::string> attachment;
+    std::string attachment;
 } MessageForm;

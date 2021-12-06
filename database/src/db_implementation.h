@@ -17,13 +17,13 @@ public:
 
     Chat ExtractChatByID(unsigned long id) override;
 
-    message AddMessage(MessageForm msg) override;
+    Message AddMessage(MessageForm msg) override;
 
     std::vector<unsigned long>
     ExtractChatMessagesID(unsigned long chat_id, unsigned long first,
                           unsigned long last) override;
 
-    message ExtractMessageByID(unsigned long id) override;
+    Message ExtractMessageByID(unsigned long id) override;
 
     std::vector<unsigned long> LastMessagesByUserID(unsigned long id) override;
 
@@ -43,4 +43,6 @@ private:
     void FillChatInfoWithoutUsers(Chat &chat, const pqxx::result &result);
 
     void FillChatInfoUsers(Chat &chat, const pqxx::result &result);
+
+    void FillMessage(Message &message, const pqxx::result &result);
 };

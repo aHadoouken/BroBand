@@ -64,11 +64,24 @@ PostgresDB::FillChatInfoWithoutUsers(Chat &chat, const pqxx::result &result) {
 }
 
 void
-PostgresDB::FillChatInfoUsers(Chat &chat, const pqxx::result &result){
+PostgresDB::FillChatInfoUsers(Chat &chat, const pqxx::result &result) {
     for (pqxx::result::const_iterator r = result.begin();
          r != result.end(); r++) {
         chat.users_id.push_back(r[0].as<unsigned long>());
     }
+}
+
+void PostgresDB::FillMessage(Message &message, const pqxx::result &result) {
+    message.id = result[0][0].as<unsigned long>();
+    message.sender_id = result[0][1].as<unsigned long>();
+    message.chat_id = result[0][2].as<unsigned long>();
+    if (!result[0][3].is_null()) {
+        message.message = result[0][3].as<std::string>();
+    }
+    if (!result[0][4].is_null()) {
+        message.attachment = result[0][4].as<std::string>();
+    }
+    message.created_at = result[0][5].as<std::string>();
 }
 
 User PostgresDB::AddUser(UserForm userForm) {
@@ -81,8 +94,8 @@ User PostgresDB::AddUser(UserForm userForm) {
             "INSERT INTO users(nickname, profile_avatar, created_at)"
             " VALUES (%s, %s, now())"
             " returning *;")
-                       % userForm.nickname.data()
-                       % userForm.profile_avatar.data()).str();
+                       % userForm.nickname
+                       % userForm.profile_avatar).str();
 
     pqxx::work W(connect);
     pqxx::result result = W.exec(sql);
@@ -120,7 +133,7 @@ User PostgresDB::ExtractUserByID(unsigned long id) {
 User PostgresDB::ExtractUserByNickName(const std::string &nickname) {
     std::string sql = (boost::format(
             "SELECT * FROM users WHERE nickname='%s';")
-                       % nickname.data()).str();
+                       % nickname).str();
 
     pqxx::nontransaction N(connect);
     pqxx::result result = N.exec(sql);
@@ -153,7 +166,7 @@ Chat PostgresDB::AddChat(ChatForm chatForm) {
             "INSERT INTO chats(chat_name, total_messages, created_at)"
             " VALUES (%s, 0, now())"
             " returning *;")
-                       % chatForm.chat_name.data()).str();
+                       % chatForm.chat_name).str();
 
     pqxx::work W(connect);
     pqxx::result result = W.exec(sql);
@@ -202,8 +215,42 @@ Chat PostgresDB::ExtractChatByID(unsigned long id) {
     return chat;
 }
 
-message PostgresDB::AddMessage(MessageForm msg) {
-    throw NotImplemented();
+Message PostgresDB::AddMessage(MessageForm msg) {
+    if (!msg.sender_id || !msg.chat_id ||
+        (msg.attachment.empty() && msg.message.empty()))
+        throw InvalidInputs("Invalid inputs for MessageForm");
+    // Проверка, что чат существвует
+    ExtractChatByID(msg.chat_id);
+    // Проверка, что отправитель существует и он есть в указанном чате
+    auto user = ExtractUserByID(msg.sender_id);
+    if (std::find(user.chats_id.begin(), user.chats_id.end(), msg.chat_id) ==
+        user.chats_id.end()) {
+        throw InvalidInputs("The user is not a member of the chat");
+    }
+    msg.message = msg.message.empty() ?
+                  "NULL" : "'" + msg.message + "'";
+    msg.attachment = msg.attachment.empty() ?
+                     "NULL" : "'" + msg.attachment + "'";
+    std::string sql = (boost::format(
+            "UPDATE chats "
+            "SET total_messages = total_messages + 1 "
+            "WHERE id = %lu;"
+            "INSERT INTO messages(author_id, chat_id, message, attachment, created_at)"
+            " VALUES (%lu, %lu, %s, %s, now())"
+            " returning *;")
+                       % msg.chat_id
+                       % msg.sender_id
+                       % msg.chat_id
+                       % msg.message
+                       % msg.attachment).str();
+
+    pqxx::work W(connect);
+    pqxx::result result = W.exec(sql);
+    W.commit();
+
+    Message message;
+    FillMessage(message, result);
+    return message;
 }
 
 std::vector<unsigned long>
@@ -212,7 +259,7 @@ PostgresDB::ExtractChatMessagesID(unsigned long chat_id, unsigned long first,
     throw NotImplemented();
 }
 
-message PostgresDB::ExtractMessageByID(unsigned long id) {
+Message PostgresDB::ExtractMessageByID(unsigned long id) {
     throw NotImplemented();
 }
 

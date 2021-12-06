@@ -14,13 +14,13 @@ public:
 
     virtual Chat ExtractChatByID(unsigned long id) = 0;
 
-    virtual message AddMessage(MessageForm msg) = 0;
+    virtual Message AddMessage(MessageForm msg) = 0;
 
     virtual std::vector<unsigned long>
     ExtractChatMessagesID(unsigned long chat_id, unsigned long first,
                           unsigned long last) = 0;
 
-    virtual message ExtractMessageByID(unsigned long id) = 0;
+    virtual Message ExtractMessageByID(unsigned long id) = 0;
 
     virtual std::vector<unsigned long>
     LastMessagesByUserID(unsigned long id) = 0;
