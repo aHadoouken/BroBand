@@ -9,18 +9,18 @@ int main() {
         PostgresDB db("/home/alex/mail_cpp/BroBand/database/db_config.cfg");
         UserForm userForm;
         User user;
-        userForm.nickname = "alex113";
+        userForm.login = "alex113";
         userForm.profile_avatar = "/user/aaa2a.png";
-        user = db.ExtractUserByID(1);
-        cout << user.id << " " << user.nickname << " " << user.profile_avatar
+        user = db.GetUserByID(1);
+        cout << user.id << " " << user.login << " " << user.profile_avatar
              << " " << user.created_at << endl;
         for (auto &el:user.chats_id){
             std::cout << el << " ";
         }
         std::cout << std::endl;
 
-        user = db.ExtractUserByNickName("user2");
-        cout << user.id << " " << user.nickname << " " << user.profile_avatar
+        user = db.GetUserByLogin("user2");
+        cout << user.id << " " << user.login << " " << user.profile_avatar
              << " " << user.created_at << endl;
         for (auto &el:user.chats_id){
             std::cout << el << " ";
@@ -39,7 +39,7 @@ int main() {
         Message msg;
         msgForm.sender_id = 1;
         msgForm.chat_id = 1;
-        msgForm.message = "msg";
+        msgForm.text = "msg";
         msg = db.AddMessage(msgForm);
     }
     catch (pqxx::plpgsql_no_data_found &ex) {

@@ -12,17 +12,20 @@
 TEST(DBLibTest, AddUserValidInputs) {
     PostgresDB postgres(CONFIG);
     UserForm userForm;
-    User user;
-    userForm.nickname = "User1453";
-    user = postgres.AddUser(userForm);
-    EXPECT_EQ(user.nickname, userForm.nickname);
+    userForm.login = "User1453";
+    userForm.name = "name1453";
+    userForm.password = "password1453";
+    auto user = postgres.AddUser(userForm);
+    EXPECT_EQ(user.login, userForm.login);
+    EXPECT_EQ(user.name, userForm.name);
     EXPECT_TRUE(user.profile_avatar.empty());
     EXPECT_FALSE(user.created_at.empty());
     EXPECT_TRUE(user.chats_id.empty());
-    userForm.nickname = "User1454";
+    userForm.login = "User1454";
     userForm.profile_avatar = "/image/image.png";
     user = postgres.AddUser(userForm);
-    EXPECT_EQ(user.nickname, userForm.nickname);
+    EXPECT_EQ(user.login, userForm.login);
+    EXPECT_EQ(user.name, userForm.name);
     EXPECT_EQ(user.profile_avatar, userForm.profile_avatar);
     EXPECT_FALSE(user.created_at.empty());
     EXPECT_TRUE(user.chats_id.empty());
@@ -34,34 +37,51 @@ TEST(DBLibTest, AddUserInvalidInputs) {
     EXPECT_THROW(postgres.AddUser(userForm), InvalidInputs);
     userForm.profile_avatar = "/image/image.png";
     EXPECT_THROW(postgres.AddUser(userForm), InvalidInputs);
-    userForm.nickname = "";
+    userForm.login = "";
     EXPECT_THROW(postgres.AddUser(userForm), InvalidInputs);
-    userForm.nickname = "User1454";
+    userForm.login = "User1454";
+    userForm.name = "name1453";
+    userForm.password = "password1453";
     EXPECT_THROW(postgres.AddUser(userForm), pqxx::unique_violation);
 }
 
-TEST(DBLibTest, ExtractUserByIDTest) {
+TEST(DBLibTest, GetUserByIDTest) {
     PostgresDB postgres(CONFIG);
     User user;
-    user = postgres.ExtractUserByID(1);
+    user = postgres.GetUserByID(1);
     EXPECT_EQ(user.id, 1);
-    EXPECT_EQ(user.nickname, "user1");
+    EXPECT_EQ(user.login, "user1");
     EXPECT_TRUE(user.profile_avatar.empty());
     std::vector<unsigned long> chats_id = {1, 2, 3};
     EXPECT_EQ(user.chats_id, chats_id);
-    EXPECT_THROW(postgres.ExtractUserByID(42), pqxx::plpgsql_no_data_found);
+    EXPECT_EQ(user.name, "name1");
+    EXPECT_THROW(postgres.GetUserByID(1142), pqxx::plpgsql_no_data_found);
 }
 
-TEST(DBLibTest, ExtractUserByNickNameTest) {
+TEST(DBLibTest, GetUserByLoginTest) {
     PostgresDB postgres(CONFIG);
     User user;
-    user = postgres.ExtractUserByNickName("user1");
+    user = postgres.GetUserByLogin("user1");
     EXPECT_EQ(user.id, 1);
-    EXPECT_EQ(user.nickname, "user1");
+    EXPECT_EQ(user.login, "user1");
     EXPECT_TRUE(user.profile_avatar.empty());
     std::vector<unsigned long> chats_id = {1, 2, 3};
     EXPECT_EQ(user.chats_id, chats_id);
-    EXPECT_THROW(postgres.ExtractUserByNickName("user144"),
+    EXPECT_EQ(user.name, "name1");
+    EXPECT_THROW(postgres.GetUserByLogin("user1444444"),
+                 pqxx::plpgsql_no_data_found);
+}
+
+TEST(DBLibTest, AuthorizationTest) {
+    PostgresDB postgres(CONFIG);
+    UserLogin userLogin;
+    userLogin.login = "user1";
+    userLogin.password = "password1";
+    EXPECT_TRUE(postgres.Authorization(userLogin));
+    userLogin.password = "password122";
+    EXPECT_FALSE(postgres.Authorization(userLogin));
+    userLogin.login = "user1123123123";
+    EXPECT_THROW(postgres.Authorization(userLogin),
                  pqxx::plpgsql_no_data_found);
 }
 
@@ -87,16 +107,16 @@ TEST(DBLibTest, AddChatInvalidInputs) {
     EXPECT_THROW(postgres.AddChat(chatForm), pqxx::plpgsql_no_data_found);
 }
 
-TEST(DBLibTest, ExtractChatByIDTest) {
+TEST(DBLibTest, GetChatByIDTest) {
     PostgresDB postgres(CONFIG);
     Chat chat;
-    chat = postgres.ExtractChatByID(1);
+    chat = postgres.GetChatByID(1);
     EXPECT_EQ(chat.id, 1);
     EXPECT_EQ(chat.chat_name, "chat1");
     EXPECT_EQ(chat.total_messages, 10);
     std::vector<unsigned long> users_id = {1, 2};
     EXPECT_EQ(chat.users_id, users_id);
-    EXPECT_THROW(postgres.ExtractUserByID(402), pqxx::plpgsql_no_data_found);
+    EXPECT_THROW(postgres.GetUserByID(402), pqxx::plpgsql_no_data_found);
 }
 
 TEST(DBLibTest, AddMessageValidInputs) {
@@ -105,27 +125,27 @@ TEST(DBLibTest, AddMessageValidInputs) {
     Message msg;
     msgForm.sender_id = 1;
     msgForm.chat_id = 1;
-    msgForm.message = "msg";
+    msgForm.text = "msg";
     EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
     EXPECT_EQ(msgForm.sender_id, msg.sender_id);
     EXPECT_EQ(msgForm.chat_id, msg.chat_id);
-    EXPECT_EQ(msgForm.message, msg.message);
+    EXPECT_EQ(msgForm.text, msg.text);
     EXPECT_EQ(msgForm.attachment, msg.attachment);
     msgForm.attachment = "attachment";
-    msgForm.message = "";
+    msgForm.text = "";
     EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
     EXPECT_EQ(msgForm.sender_id, msg.sender_id);
     EXPECT_EQ(msgForm.chat_id, msg.chat_id);
-    EXPECT_EQ(msgForm.message, msg.message);
+    EXPECT_EQ(msgForm.text, msg.text);
     EXPECT_EQ(msgForm.attachment, msg.attachment);
     msgForm.sender_id = 4;
     msgForm.chat_id = 2;
     msgForm.attachment = "attachment";
-    msgForm.message = "msg2";
+    msgForm.text = "msg2";
     EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
     EXPECT_EQ(msgForm.sender_id, msg.sender_id);
     EXPECT_EQ(msgForm.chat_id, msg.chat_id);
-    EXPECT_EQ(msgForm.message, msg.message);
+    EXPECT_EQ(msgForm.text, msg.text);
     EXPECT_EQ(msgForm.attachment, msg.attachment);
 }
 
@@ -136,19 +156,38 @@ TEST(DBLibTest, AddMessageInvalidInputs) {
     EXPECT_THROW(msg = postgres.AddMessage(msgForm), InvalidInputs);
     msgForm.sender_id = 1;
     msgForm.chat_id = 1;
-    msgForm.message = "";
+    msgForm.text = "";
     EXPECT_THROW(msg = postgres.AddMessage(msgForm), InvalidInputs);
     msgForm.sender_id = 1000222;
-    msgForm.message = "123123";
-    EXPECT_THROW(msg = postgres.AddMessage(msgForm), pqxx::plpgsql_no_data_found);
+    msgForm.text = "123123";
+    EXPECT_THROW(msg = postgres.AddMessage(msgForm),
+                 pqxx::plpgsql_no_data_found);
     msgForm.sender_id = 3;
     msgForm.chat_id = 1;
     EXPECT_THROW(msg = postgres.AddMessage(msgForm), InvalidInputs);
     msgForm.chat_id = 10000;
-    EXPECT_THROW(msg = postgres.AddMessage(msgForm), pqxx::plpgsql_no_data_found);
+    EXPECT_THROW(msg = postgres.AddMessage(msgForm),
+                 pqxx::plpgsql_no_data_found);
 }
 
-TEST(DBLibTest, ExtractChatMessagesID) {
+TEST(DBLibTest, GetChatMessages) {
+    PostgresDB postgres(CONFIG);
+    unsigned long chatIDTest = 4;
+    std::vector<Message> msgs;
+    EXPECT_NO_THROW(msgs = postgres.GetChatMessages(1));
+    EXPECT_EQ(msgs[0].id, 1);
+    EXPECT_EQ(msgs[0].sender_id, 1);
+    EXPECT_EQ(msgs[0].chat_id, 1);
+    EXPECT_EQ(msgs[0].text, "message1 1");
+    EXPECT_EQ(msgs[0].attachment, "/image/1_1");
+    EXPECT_EQ(msgs[1].id, 2);
+    EXPECT_EQ(msgs[1].sender_id, 2);
+    EXPECT_EQ(msgs[1].chat_id, 1);
+    EXPECT_TRUE(msgs[1].text.empty());
+    EXPECT_EQ(msgs[1].attachment, "/image/2_1");
+}
+
+TEST(DBLibTest, GetChatMessagesID) {
     PostgresDB postgres(CONFIG);
     unsigned long chatIDTest = 4;
     std::vector<unsigned long> msgID;
@@ -166,7 +205,7 @@ TEST(DBLibTest, ExtractMessageByID) {
     msgTest.id = msgIDTest;
     msgTest.sender_id = 1;
     msgTest.chat_id = 2;
-    msgTest.message = "TestMessage";
+    msgTest.text = "TestMessage";
     msgTest.attachment = {"att1", "att2"};
     msgTest.created_at = "03-02-1998 13-15-07";
 
@@ -174,7 +213,7 @@ TEST(DBLibTest, ExtractMessageByID) {
     EXPECT_EQ(msgTest.id, msg.id);
     EXPECT_EQ(msgTest.sender_id, msg.sender_id);
     EXPECT_EQ(msgTest.chat_id, msg.chat_id);
-    EXPECT_EQ(msgTest.message, msg.message);
+    EXPECT_EQ(msgTest.text, msg.text);
     EXPECT_EQ(msgTest.attachment, msg.attachment);
     EXPECT_EQ(msgTest.created_at, msg.created_at);
 }

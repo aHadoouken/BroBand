@@ -5,14 +5,17 @@
 
 typedef struct User {
     unsigned long id;
-    std::string nickname;
+    std::string login;
+    std::string name;
     std::string profile_avatar;
     std::string created_at;
     std::vector<unsigned long> chats_id;
 } User;
 
 typedef struct UserForm {
-    std::string nickname;
+    std::string login;
+    std::string name;
+    std::string password;
     std::string profile_avatar;
 } UserForm;
 
@@ -29,11 +32,16 @@ typedef struct ChatForm {
     std::vector<unsigned long> users_id;
 } ChatForm;
 
+typedef struct UserLogin {
+    std::string login;
+    std::string password;
+} UserLogin;
+
 typedef struct Message {
     unsigned long id;
     unsigned long sender_id;
     unsigned long chat_id;
-    std::string message;
+    std::string text;
     std::string attachment;
     std::string created_at;
 } Message;
@@ -41,6 +49,6 @@ typedef struct Message {
 typedef struct MessageForm {
     unsigned long sender_id;
     unsigned long chat_id;
-    std::string message;
+    std::string text;
     std::string attachment;
 } MessageForm;

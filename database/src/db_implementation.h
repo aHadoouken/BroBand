@@ -9,15 +9,19 @@ public:
 
     User AddUser(UserForm userForm) override;
 
-    User ExtractUserByID(unsigned long id) override;
+    User GetUserByID(unsigned long id) override;
 
-    User ExtractUserByNickName(const std::string &nickname) override;
+    User GetUserByLogin(const std::string &login) override;
+
+    bool Authorization(UserLogin userLogin) override;
 
     Chat AddChat(ChatForm chatForm) override;
 
-    Chat ExtractChatByID(unsigned long id) override;
+    Chat GetChatByID(unsigned long id) override;
 
     Message AddMessage(MessageForm msg) override;
+
+    std::vector<Message> GetChatMessages(unsigned long chat_id) override;
 
     std::vector<unsigned long>
     ExtractChatMessagesID(unsigned long chat_id, unsigned long first,
@@ -45,4 +49,7 @@ private:
     void FillChatInfoUsers(Chat &chat, const pqxx::result &result);
 
     void FillMessage(Message &message, const pqxx::result &result);
+
+    void
+    FillMessages(std::vector<Message> &messages, const pqxx::result &result);
 };

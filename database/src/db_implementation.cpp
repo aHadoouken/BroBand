@@ -41,10 +41,11 @@ std::string PostgresDB::ParseConfig(const std::string &config_path) {
 void
 PostgresDB::FillUserInfoWithoutChats(User &user, const pqxx::result &result) {
     user.id = result[0][0].as<unsigned long>();
-    user.nickname = result[0][1].as<std::string>();
-    user.created_at = result[0][3].as<std::string>();
-    if (!result[0][2].is_null()) {
-        user.profile_avatar = result[0][2].as<std::string>();
+    user.login = result[0][1].as<std::string>();
+    user.name = result[0][2].as<std::string>();
+    user.created_at = result[0][5].as<std::string>();
+    if (!result[0][4].is_null()) {
+        user.profile_avatar = result[0][4].as<std::string>();
     }
 }
 
@@ -76,7 +77,7 @@ void PostgresDB::FillMessage(Message &message, const pqxx::result &result) {
     message.sender_id = result[0][1].as<unsigned long>();
     message.chat_id = result[0][2].as<unsigned long>();
     if (!result[0][3].is_null()) {
-        message.message = result[0][3].as<std::string>();
+        message.text = result[0][3].as<std::string>();
     }
     if (!result[0][4].is_null()) {
         message.attachment = result[0][4].as<std::string>();
@@ -84,17 +85,41 @@ void PostgresDB::FillMessage(Message &message, const pqxx::result &result) {
     message.created_at = result[0][5].as<std::string>();
 }
 
+void PostgresDB::FillMessages(std::vector<Message> &messages,
+                              const pqxx::result &result) {
+    if (messages.size() != result.size()) {
+        throw InvalidInputs();
+    }
+    for (int i = 0; i < result.size(); i++) {
+        messages[i].id = result[i][0].as<unsigned long>();
+        messages[i].sender_id = result[i][1].as<unsigned long>();
+        messages[i].chat_id = result[i][2].as<unsigned long>();
+        if (!result[i][3].is_null()) {
+            messages[i].text = result[i][3].as<std::string>();
+        }
+        if (!result[i][4].is_null()) {
+            messages[i].attachment = result[i][4].as<std::string>();
+        }
+        messages[i].created_at = result[i][5].as<std::string>();
+    }
+}
+
 User PostgresDB::AddUser(UserForm userForm) {
-    if (userForm.nickname.empty())
-        throw InvalidInputs("User nickname is not define");
-    userForm.nickname = "'" + userForm.nickname + "'";
+    if (userForm.login.empty() || userForm.name.empty() ||
+        userForm.password.empty())
+        throw InvalidInputs("User inputs are not define");
+    userForm.name = "'" + userForm.name + "'";
+    userForm.login = "'" + userForm.login + "'";
+    userForm.password = "'" + userForm.password + "'";
     userForm.profile_avatar = userForm.profile_avatar.empty() ?
                               "NULL" : "'" + userForm.profile_avatar + "'";
     std::string sql = (boost::format(
-            "INSERT INTO users(nickname, profile_avatar, created_at)"
-            " VALUES (%s, %s, now())"
+            "INSERT INTO users(login, name, password, profile_avatar, created_at)"
+            " VALUES (%s, %s, %s, %s, now())"
             " returning *;")
-                       % userForm.nickname
+                       % userForm.login
+                       % userForm.name
+                       % userForm.password
                        % userForm.profile_avatar).str();
 
     pqxx::work W(connect);
@@ -106,7 +131,7 @@ User PostgresDB::AddUser(UserForm userForm) {
     return user;
 }
 
-User PostgresDB::ExtractUserByID(unsigned long id) {
+User PostgresDB::GetUserByID(unsigned long id) {
     std::string sql = (boost::format(
             "SELECT * FROM users WHERE user_id=%lu;")
                        % id).str();
@@ -130,10 +155,10 @@ User PostgresDB::ExtractUserByID(unsigned long id) {
     return user;
 }
 
-User PostgresDB::ExtractUserByNickName(const std::string &nickname) {
+User PostgresDB::GetUserByLogin(const std::string &login) {
     std::string sql = (boost::format(
-            "SELECT * FROM users WHERE nickname='%s';")
-                       % nickname).str();
+            "SELECT * FROM users WHERE login='%s';")
+                       % login).str();
 
     pqxx::nontransaction N(connect);
     pqxx::result result = N.exec(sql);
@@ -153,6 +178,27 @@ User PostgresDB::ExtractUserByNickName(const std::string &nickname) {
     return user;
 }
 
+bool PostgresDB::Authorization(UserLogin userLogin) {
+    if (userLogin.login.empty() || userLogin.password.empty()) {
+        throw InvalidInputs();
+    }
+    std::string sql = (boost::format(
+            "SELECT password FROM users WHERE login='%s';")
+                       % userLogin.login).str();
+
+    pqxx::nontransaction N(connect);
+    pqxx::result result = N.exec(sql);
+    if (result.empty()) {
+        throw pqxx::plpgsql_no_data_found("User not found");
+    }
+    auto password = result[0][0].as<std::string>();
+    if (password == userLogin.password) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 Chat PostgresDB::AddChat(ChatForm chatForm) {
     if (chatForm.chat_name.empty())
         throw InvalidInputs("Chat name is not define");
@@ -160,7 +206,7 @@ Chat PostgresDB::AddChat(ChatForm chatForm) {
         throw InvalidInputs("Users id for chat are not define");
     // Проверка, что пользователь существует
     for (auto &user_id: chatForm.users_id)
-        ExtractUserByID(user_id);
+        GetUserByID(user_id);
     chatForm.chat_name = "'" + chatForm.chat_name + "'";
     std::string sql = (boost::format(
             "INSERT INTO chats(chat_name, total_messages, created_at)"
@@ -193,7 +239,7 @@ Chat PostgresDB::AddChat(ChatForm chatForm) {
     return chat;
 }
 
-Chat PostgresDB::ExtractChatByID(unsigned long id) {
+Chat PostgresDB::GetChatByID(unsigned long id) {
     std::string sql = (boost::format(
             "SELECT * FROM chats WHERE id=%lu;")
                        % id).str();
@@ -217,31 +263,31 @@ Chat PostgresDB::ExtractChatByID(unsigned long id) {
 
 Message PostgresDB::AddMessage(MessageForm msg) {
     if (!msg.sender_id || !msg.chat_id ||
-        (msg.attachment.empty() && msg.message.empty()))
+        (msg.attachment.empty() && msg.text.empty()))
         throw InvalidInputs("Invalid inputs for MessageForm");
     // Проверка, что чат существвует
-    ExtractChatByID(msg.chat_id);
+    GetChatByID(msg.chat_id);
     // Проверка, что отправитель существует и он есть в указанном чате
-    auto user = ExtractUserByID(msg.sender_id);
+    auto user = GetUserByID(msg.sender_id);
     if (std::find(user.chats_id.begin(), user.chats_id.end(), msg.chat_id) ==
         user.chats_id.end()) {
         throw InvalidInputs("The user is not a member of the chat");
     }
-    msg.message = msg.message.empty() ?
-                  "NULL" : "'" + msg.message + "'";
+    msg.text = msg.text.empty() ?
+               "NULL" : "'" + msg.text + "'";
     msg.attachment = msg.attachment.empty() ?
                      "NULL" : "'" + msg.attachment + "'";
     std::string sql = (boost::format(
             "UPDATE chats "
             "SET total_messages = total_messages + 1 "
             "WHERE id = %lu;"
-            "INSERT INTO messages(author_id, chat_id, message, attachment, created_at)"
+            "INSERT INTO messages(sender_id, chat_id, text, attachment, created_at)"
             " VALUES (%lu, %lu, %s, %s, now())"
             " returning *;")
                        % msg.chat_id
                        % msg.sender_id
                        % msg.chat_id
-                       % msg.message
+                       % msg.text
                        % msg.attachment).str();
 
     pqxx::work W(connect);
@@ -251,6 +297,24 @@ Message PostgresDB::AddMessage(MessageForm msg) {
     Message message;
     FillMessage(message, result);
     return message;
+}
+
+std::vector<Message> PostgresDB::GetChatMessages(unsigned long chat_id) {
+    std::string sql = (boost::format(
+            "SELECT * FROM messages WHERE chat_id=%lu;")
+                       % chat_id).str();
+
+    pqxx::nontransaction N(connect);
+    pqxx::result result = N.exec(sql);
+    if (result.empty()) {
+        throw pqxx::plpgsql_no_data_found("Messages not found");
+    }
+    std::vector<Message> messages;
+    messages.resize(result.size());
+
+    FillMessages(messages, result);
+
+    return messages;
 }
 
 std::vector<unsigned long>
