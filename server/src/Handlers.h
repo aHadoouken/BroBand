@@ -9,8 +9,8 @@
 
 #include "db_implementation.h"
 
-#define AVATARS "/home/alex/Avatars/"
-#define IMAGES "/home/alex/Images/"
+#define AVATARS "/home/alex/mail_cpp/Avatars/"
+#define IMAGES "/home/alex/mail_cpp/Images/"
 #define DB_CONFIG "/home/alex/mail_cpp/Boost_test/db_config.cfg"
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
@@ -29,6 +29,9 @@ public:
     AddChat(http::request <http::string_body> request);
 
     http::response <http::string_body>
+    Authorization(http::request <http::string_body> request);
+
+    http::response <http::string_body>
     AddMessage(http::request <http::string_body> request);
 
     http::response <http::string_body>
@@ -36,6 +39,9 @@ public:
 
     http::response <http::string_body>
     GetChat(http::request <http::string_body> request);
+
+    http::response <http::string_body>
+    GetChatMessages(http::request <http::string_body> request);
 
     http::response <http::string_body>
     GetMessage(http::request <http::string_body> request);
@@ -46,4 +52,6 @@ private:
     std::string GetUserBody(User user);
 
     std::string GetChatBody(Chat chat);
+
+    std::string GetMessageBody(Message msg);
 };

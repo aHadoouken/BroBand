@@ -44,6 +44,9 @@ void Connection::HandleRead(beast::error_code e,
     if (e == http::error::end_of_stream)
         return DoClose();
 
+    std::cout << "Request target: " << request_.target() << std::endl;
+    //std::cout << "Request body: " << std::endl << request_.body() << std::endl;
+
     if (!e) {
         http::response<http::string_body> res{http::status::bad_request,
                                               request_.version()};
@@ -64,6 +67,15 @@ void Connection::HandleRead(beast::error_code e,
             } else if (target == "/chat_info" &&
                        request_.method() == http::verb::get) {
                 res = handlers_.GetChat(request_);
+            } else if (target == "/user_logIn" &&
+                       request_.method() == http::verb::post) {
+                res = handlers_.Authorization(request_);
+            } else if (target == "/add_message" &&
+                       request_.method() == http::verb::post) {
+                res = handlers_.AddMessage(request_);
+            } else if (target == "/chat_messages" &&
+                       request_.method() == http::verb::get) {
+                res = handlers_.GetChatMessages(request_);
             } else {
                 res.set(http::field::content_type, "application/json");
                 res.result(http::status::not_found);
@@ -93,6 +105,8 @@ void Connection::HandleRead(beast::error_code e,
             res.set(http::field::content_type, "application/json");
             res.body() = ex.what();
         }
+
+        //std::cout << "Response body: " << std::endl << res.body() << std::endl;
 
         auto sp = std::make_shared<http::message<false, http::string_body>>(
                 std::move(res));
