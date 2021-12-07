@@ -50,16 +50,20 @@ protected:
     Probability prob;
 
 public:
+    int set_threshold(double _threshold);
+
     virtual Probability forward(T *data) = 0;
 
     virtual int load_model(const std::string &path) = 0;
-
-    int set_threshold(double _threshold);
 };
 
 class PornImageDetector : TorchWrapper<torch::Tensor> {
 private:
     cv::Mat orig_img;
+
+    cv::Mat base642mat(const std::string &base64_code);
+
+    std::string mat2base64(const cv::Mat *img);
 
 public:
     int load_model(const std::string &path) override;
@@ -72,17 +76,16 @@ public:
 
     Probability forward(torch::Tensor *data) override;
 
-    ImageWrapper *blurring();
+    std::string blurring();
 };
 
 class PornTextDetector : TorchWrapper<Message> {
 public:
-    Probability forward(Message* data) override;
+    Probability forward(Message *data) override;
 
     std::string preproccesing(std::string &text);
 
     MessageWrapper *text_replace(Message *data);
 };
-
 
 #endif//BROBAND_DETECTING_H
