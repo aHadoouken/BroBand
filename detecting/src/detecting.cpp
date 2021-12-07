@@ -8,6 +8,7 @@
 #include <opencv2/opencv.hpp>                 // for image proccessing
 #include <torch/csrc/api/include/torch/cuda.h>// for cuda
 #include <torch/script.h>                     // for torchScript
+#include <boost/beast.hpp>
 
 #define HEIGHT 224
 #define WIDTH 224
@@ -15,32 +16,38 @@
 std::vector<double> MEAN = {0.485, 0.456, 0.406};
 std::vector<double> STD = {0.229, 0.224, 0.225};
 
-std::ostream &operator<<(std::ostream &out, const Probability &prob) {
-
+std::ostream &operator<<(std::ostream &out, const Probability &prob)
+{
     out << "[" << 1 - prob.porn << "," << prob.porn << "]"
         << "\n";
     return out;
 }
 
 template<typename T>
-int TorchWrapper<T>::set_threshold(double _threshold) {
-
-    if (_threshold > 0.0 && _threshold < 1.0) {
+int TorchWrapper<T>::set_threshold(double _threshold)
+{
+    if (_threshold > 0.0 && _threshold < 1.0)
+    {
         threshold = _threshold;
-    } else {
+    }
+    else
+    {
         throw std::logic_error("Threshold can be from 0 to 1");
     }
 
     return 0;
 }
 
-int PornImageDetector::load_model(const std::string &path) {
-
-    try {
+int PornImageDetector::load_model(const std::string &path)
+{
+    try
+    {
         model = torch::jit::load(path);
 
-     // Error - основной класс ошибок
-    } catch (const c10::Error &ex) {
+        // Error - основной класс ошибок
+    }
+    catch (const c10::Error &ex)
+    {
 
         std::cerr << "Error loading the model\n";
         return 1;
@@ -50,8 +57,8 @@ int PornImageDetector::load_model(const std::string &path) {
     return 0;
 }
 
-Probability PornImageDetector::forward(torch::Tensor *img) {
-
+Probability PornImageDetector::forward(torch::Tensor *img)
+{
     torch::NoGradGuard no_grad;// turn off trainable function
 
     torch::Tensor output = model.forward({*img}).toTensor();
@@ -73,20 +80,26 @@ Probability PornImageDetector::forward(torch::Tensor *img) {
     return probability;
 }
 
-ImageWrapper *PornImageDetector::blurring() {
+std::string PornImageDetector::blurring()
+{
 
-    if (prob.porn > threshold) {
-        cv::GaussianBlur(orig_img, orig_img, cv::Size(31, 31), 0);
+    if (prob.porn > threshold)
+    {
+        cv::GaussianBlur(orig_img, orig_img,
+                         cv::Size(31, 31),
+                         0);
     }
 
     cv::imwrite("../../2015.jpg", orig_img);
+
+    return mat2base64(&orig_img);
 }
 
-void PornImageDetector::permutation_channels(cv::Mat *img) {
-
+void PornImageDetector::permutation_channels(cv::Mat *img)
+{
     // каналы изображения
-    switch (img->channels()) {
-
+    switch (img->channels())
+    {
         case 4:
             cv::cvtColor(*img, *img, cv::COLOR_BGRA2RGB);
             break;
@@ -104,20 +117,52 @@ void PornImageDetector::permutation_channels(cv::Mat *img) {
     }
 }
 
-cv::Mat PornImageDetector::load_img(const std::string &path) {
+cv::Mat PornImageDetector::base642mat(const std::string &base64_code)
+{
+    std::string dest;
 
+    // кодирование base64 -> jpg -> Mat
+    dest.resize(boost::beast::detail::base64::decoded_size(base64_code.size()));
+    auto const result = boost::beast::detail::base64::decode(&dest[0], base64_code.data(), base64_code.size());
+    dest.resize(result.first);
+
+    std::vector<uchar> data(dest.begin(), dest.end());
+    return cv::imdecode(cv::Mat(data), 1);
+}
+
+std::string PornImageDetector::mat2base64(const cv::Mat *img)
+{
+    std::string dest;
+
+    // кодирование Mat -> jpg -> base64
+    std::vector<unsigned char> buffer;
+    cv::imencode(".jpg", *img, buffer);
+
+    //  auto *encode_msg = reinterpret_cast<unsigned char*>(buffer.data());
+    //  std::string encoded = base64_encode(encode_msg, buffer.size());
+
+    dest.resize(boost::beast::detail::base64::encoded_size(buffer.size()));
+
+    boost::beast::detail::base64::encode(&dest[0], buffer.data(), buffer.size());
+
+    return dest;
+}
+
+cv::Mat PornImageDetector::load_img(const std::string &base64_code)
+{
     // с этим объектом будут происходить манипуляции
-    cv::Mat img = cv::imread(path);
+    cv::Mat img = base642mat(base64_code);
 
     // этот объект блюрим --- оригинал
-    orig_img = cv::imread(path);
+    orig_img = base642mat(base64_code);
 
-    try {
-
+    try
+    {
         // BGR to RGB
         permutation_channels(&img);
-    } catch (const std::runtime_error &ex) {
-
+    }
+    catch (const std::runtime_error &ex)
+    {
         // если не получилось, работаем с BGR
         std::cout << "Using BGR format for image\n";
     }
@@ -125,8 +170,8 @@ cv::Mat PornImageDetector::load_img(const std::string &path) {
     return img;
 }
 
-torch::Tensor PornImageDetector::preproccesing(cv::Mat *img) {
-
+torch::Tensor PornImageDetector::preproccesing(cv::Mat *img)
+{
     // так как вход сети 224 х 224 кропаем изображение
     cv::Size target_size(WIDTH, HEIGHT);
     cv::resize(*img, *img, target_size);
@@ -147,7 +192,9 @@ torch::Tensor PornImageDetector::preproccesing(cv::Mat *img) {
     return img_tensor.clone();
 }
 
-Probability PornTextDetector::forward(Message *data) {
+
+Probability PornTextDetector::forward(Message *data)
+{
     throw NotImplemented();
 }
 
