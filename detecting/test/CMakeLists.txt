@@ -7,6 +7,16 @@ add_link_options( -O0 -lgcov --coverage)
 include_directories("../include")
 include_directories("../src")
 
+set(CMAKE_PREFIX_PATH "/home/d3vyatk4/libtorch")
+
+include_directories("../libtorch/include")
+find_package(Torch REQUIRED)
+
+find_package(OpenCV REQUIRED)
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
 # Включаем тестирование
 enable_testing()
 
@@ -19,4 +29,4 @@ include_directories(${GTEST_INCLUDE_DIRS})
 add_executable(test_detect test.cpp)
 
 # Линкуем (соединяем) программу со статической библиотекой
-target_link_libraries(test_detect ${GTEST_LIBRARIES} detect pthread)
+target_link_libraries(test_detect ${GTEST_LIBRARIES} detect pthread "${TORCH_LIBRARIES}" ${OpenCV_LIBS})
