@@ -10,10 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt update
+      - run: sudo apt-get update
+      - run: sudo apt-get install wget
+      - run: sudo apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
       - run: wget -O boost_1_77_0.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz
       - run: tar xzvf boost_1_77_0.tar.gz
       - run: cd boost_1_77_0/
+      - run: ./bootstrap.sh --prefix=/usr/
+      - run: ./b2
+      - run: sudo ./b2 install
       - run: sudo apt-get install -y libgtest-dev
       - run: sudo apt-get install -y qt5-default qtbase5-examples qtdeclarative5-examples
       - run: sudo apt-get install -y libboost-all-dev
@@ -49,7 +54,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt update
+      - run: sudo apt-get update
+      - run: sudo apt-get install wget
+      - run: sudo apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
+      - run: wget -O boost_1_77_0.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz
+      - run: tar xzvf boost_1_77_0.tar.gz
+      - run: cd boost_1_77_0/
+      - run: ./bootstrap.sh --prefix=/usr/
+      - run: ./b2
+      - run: sudo ./b2 install
       - run: sudo apt-get install -y libgtest-dev
       - run: sudo apt-get install -y gcovr
       - run: sudo apt-get install -y lcov
@@ -76,7 +89,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt-get -qq update
+      - run: sudo apt-get update
+      - run: sudo apt-get install wget
+      - run: sudo apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
+      - run: wget -O boost_1_77_0.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz
+      - run: tar xzvf boost_1_77_0.tar.gz
+      - run: cd boost_1_77_0/
+      - run: ./bootstrap.sh --prefix=/usr/
+      - run: ./b2
+      - run: sudo ./b2 install
       - run: sudo apt-get install -y valgrind
       - run: sudo apt-get install -y libgtest-dev
       - run: sudo apt-get install -y qt5-default qtbase5-examples qtdeclarative5-examples
