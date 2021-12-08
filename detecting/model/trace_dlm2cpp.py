@@ -5,13 +5,13 @@ import os
 
 class ModuleForCpp(torch.nn.Module):
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         super(ModuleForCpp, self).__init__()
 
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
             
-        self.resnet34 = torch.load(os.path.abspath('resnet34_porn_model.pth'),
+        self.resnet34 = torch.load(os.path.abspath("/home/d3vyatk4/Рабочий стол/park.mail/C++/BroBand/detecting/model/vgg11_porn_model.pth"),
                                     map_location=device)
         self.resnet34.eval()
 
@@ -29,4 +29,4 @@ if __name__ == "__main__":
     module = ModuleForCpp()
     sm = torch.jit.script(module)
 
-    sm.save('annotation_resnet34_porn_model.pt')
+    sm.save('annotation_vgg11_porn_model.pt')
