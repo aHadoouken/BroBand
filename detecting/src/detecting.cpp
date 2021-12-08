@@ -206,6 +206,6 @@ Probability PornTextDetector::forward(Message &data)
     throw NotImplemented();
 }
 
-MessageWrapper *PornTextDetector::text_replace(Message *data) {
+std::string PornTextDetector::text_replace(Message *data) {
     throw NotImplemented();
 }
