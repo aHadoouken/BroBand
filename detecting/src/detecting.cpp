@@ -6,7 +6,6 @@
 #include "Exception.h"
 
 #include <opencv2/opencv.hpp>                 // for image proccessing
-#include <torch/csrc/api/include/torch/cuda.h>// for cuda
 #include <torch/script.h>                     // for torchScript
 #include <boost/beast.hpp>
 
@@ -53,31 +52,40 @@ int PornImageDetector::load_model(const std::string &path)
         return 1;
     }
 
-    std::cout << "Successful load resnet34 model\n";
+    std::cout << "Successful load DL model\n";
     return 0;
 }
 
-Probability PornImageDetector::forward(torch::Tensor *img)
+Probability PornImageDetector::forward(torch::Tensor &img)
 {
     torch::NoGradGuard no_grad;// turn off trainable function
 
-    torch::Tensor output = model.forward({*img}).toTensor();
+    torch::Tensor output = model.forward({img}).toTensor();
 
     // вектор вероятностей принадлежности классам size = 2
-    torch::Tensor softmax_output = torch::softmax(output, 1);
+    std::tuple<torch::Tensor, torch::Tensor> result = torch::max(torch::softmax(output, 1) , 1);
 
-    std::tuple<torch::Tensor, torch::Tensor> result = torch::max(softmax_output, 1);
+    torch::Tensor proba_ = std::get<0>(result);
+    torch::Tensor index = std::get<1>(result);
 
-    torch::Tensor proba = std::get<0>(result);
+    std:: cout << "softmax: " << torch::softmax(output, 1) << "\n";
 
-    auto tmp = proba.accessor<float, 1>();
+    auto proba = proba_.accessor<float, 1>();
+    auto idx = index.accessor<long, 1>();
 
-    Probability probability;
-    probability.porn = tmp[0];
+    std:: cout << "proba[0]: " << proba[0] << "\n";
+    std:: cout << "idx[0]: " << idx[0] << "\n";
 
-    prob.porn = tmp[0];
+    if (!idx[0]) {
+        Probability probability(1 - proba[0]);
+        prob.porn = 1 - proba[0];
+        return probability;
+    } else {
+        Probability probability(proba[0]);
+        prob.porn = proba[0];
+        return probability;
+    }
 
-    return probability;
 }
 
 std::string PornImageDetector::blurring()
@@ -92,24 +100,24 @@ std::string PornImageDetector::blurring()
 
     cv::imwrite("../../2015.jpg", orig_img);
 
-    return mat2base64(&orig_img);
+    return mat2base64(orig_img);
 }
 
-void PornImageDetector::permutation_channels(cv::Mat *img)
+void PornImageDetector::permutation_channels(cv::Mat &img)
 {
     // каналы изображения
-    switch (img->channels())
+    switch (img.channels())
     {
         case 4:
-            cv::cvtColor(*img, *img, cv::COLOR_BGRA2RGB);
+            cv::cvtColor(img, img, cv::COLOR_BGRA2RGB);
             break;
 
         case 3:
-            cv::cvtColor(*img, *img, cv::COLOR_BGR2RGB);
+            cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
             break;
 
         case 1:
-            cv::cvtColor(*img, *img, cv::COLOR_GRAY2RGB);
+            cv::cvtColor(img, img, cv::COLOR_GRAY2RGB);
             break;
 
         default:
@@ -130,13 +138,13 @@ cv::Mat PornImageDetector::base642mat(const std::string &base64_code)
     return cv::imdecode(cv::Mat(data), 1);
 }
 
-std::string PornImageDetector::mat2base64(const cv::Mat *img)
+std::string PornImageDetector::mat2base64(const cv::Mat &img)
 {
     std::string dest;
 
     // кодирование Mat -> jpg -> base64
     std::vector<unsigned char> buffer;
-    cv::imencode(".jpg", *img, buffer);
+    cv::imencode(".jpg", img, buffer);
 
     //  auto *encode_msg = reinterpret_cast<unsigned char*>(buffer.data());
     //  std::string encoded = base64_encode(encode_msg, buffer.size());
@@ -159,7 +167,7 @@ cv::Mat PornImageDetector::load_img(const std::string &base64_code)
     try
     {
         // BGR to RGB
-        permutation_channels(&img);
+        permutation_channels(img);
     }
     catch (const std::runtime_error &ex)
     {
@@ -170,16 +178,16 @@ cv::Mat PornImageDetector::load_img(const std::string &base64_code)
     return img;
 }
 
-torch::Tensor PornImageDetector::preproccesing(cv::Mat *img)
+torch::Tensor PornImageDetector::preproccesing(cv::Mat &img)
 {
     // так как вход сети 224 х 224 кропаем изображение
     cv::Size target_size(WIDTH, HEIGHT);
-    cv::resize(*img, *img, target_size);
+    cv::resize(img, img, target_size);
 
-    img->convertTo(*img, CV_32FC3, 1 / 255.0);
+    img.convertTo(img, CV_32FC3, 1 / 255.0);
 
-    torch::Tensor img_tensor = torch::from_blob(img->data,
-                                                {img->rows, img->cols, img->channels()},
+    torch::Tensor img_tensor = torch::from_blob(img.data,
+                                                {img.rows, img.cols, img.channels()},
                                                 c10::kFloat);
 
     img_tensor = img_tensor.permute({2, 0, 1});
@@ -193,7 +201,7 @@ torch::Tensor PornImageDetector::preproccesing(cv::Mat *img)
 }
 
 
-Probability PornTextDetector::forward(Message *data)
+Probability PornTextDetector::forward(Message &data)
 {
     throw NotImplemented();
 }
