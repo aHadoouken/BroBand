@@ -26,24 +26,6 @@ struct Message {
     std::string text = "";
 };
 
-struct MessageWrapper {
-    Message *msg;
-    size_t sender_id;
-    size_t chat_id;
-    bool is_replace;
-
-    MessageWrapper() : msg(nullptr), sender_id(0), chat_id(0), is_replace(false) {}
-};
-
-struct ImageWrapper {
-    cv::Mat *img;
-    size_t sender_id;
-    size_t chat_id;
-    bool is_blur;
-
-    ImageWrapper() : img(nullptr), sender_id(0), chat_id(0), is_blur(false) {}
-};
-
 template<typename T>
 class TorchWrapper {
 protected:
@@ -87,7 +69,7 @@ public:
 
     std::string preproccesing(std::string &text);
 
-    MessageWrapper *text_replace(Message *data);
+     std::string text_replace(Message *data);
 };
 
 #endif//BROBAND_DETECTING_H
