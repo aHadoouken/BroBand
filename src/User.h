@@ -1,25 +1,31 @@
 #ifndef USERS_H
 #define USERS_H
+
 #include <QString>
+#include <QVector>
 #include <cstdint>
 
-class User {
-   private:
+typedef struct User {
     uint64_t id;
     QString login;
     QString name;
+    QString password;
     QString status;
+} User;
 
-   public:
-    User();
-    void setId(uint64_t);
-    uint64_t getId();
-    void setLogin(QString);
-    QString getLogin();
-    void setName(QString);
-    QString getName();
-    void setStatus(QString);
-    QString getStatus();
-};
+typedef struct Chat {
+    uint64_t id;
+    uint64_t creatorId;
+    QString name;
+} Chat;
+
+typedef struct Message {
+    uint64_t id;
+    QString text;
+    uint64_t senderId;
+    uint64_t chatId;
+    bool hasAttachment;
+    QVector<QString> attachment;
+} Message;
 
 #endif  // USERS_H
