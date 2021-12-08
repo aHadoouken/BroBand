@@ -11,6 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: sudo apt update
+      - run: wget -O boost_1_77_0.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz
+      - run: tar xzvf boost_1_77_0.tar.gz
+      - run: cd boost_1_77_0/
       - run: sudo apt-get install -y libgtest-dev
       - run: sudo apt-get install -y qt5-default qtbase5-examples qtdeclarative5-examples
       - run: sudo apt-get install -y libboost-all-dev
