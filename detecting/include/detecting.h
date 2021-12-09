@@ -34,14 +34,16 @@ protected:
     Probability prob;
 
 public:
-    int set_threshold(double _threshold);
+    TorchWrapper();
+
+    virtual int set_threshold(double _threshold);
 
     virtual Probability forward(T &data) = 0;
 
-    virtual int load_model(const std::string &path) = 0;
+    virtual int load_model(const std::string &path);
 };
 
-class PornImageDetector : TorchWrapper<torch::Tensor> {
+class PornImageDetector : public TorchWrapper<torch::Tensor> {
 private:
     cv::Mat orig_img;
 
@@ -50,9 +52,10 @@ private:
     std::string mat2base64(const cv::Mat &img);
 
 public:
-    int load_model(const std::string &path) override;
 
-    cv::Mat load_img(const std::string &path);
+    PornImageDetector();
+
+    cv::Mat load_img(const std::string &base64_code);
 
     void permutation_channels(cv::Mat &img);
 
@@ -63,7 +66,7 @@ public:
     std::string blurring();
 };
 
-class PornTextDetector : TorchWrapper<Message> {
+class PornTextDetector : public TorchWrapper<Message> {
 public:
     Probability forward(Message &data) override;
 
