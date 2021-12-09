@@ -93,7 +93,7 @@ bool Client::get_status()
     return status;
 }
 
-http::response<http::string_body> Client::get_response()
+const http::response<http::string_body> Client::get_response()
 {
     return response_;
 }

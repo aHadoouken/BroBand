@@ -47,8 +47,8 @@ class Client {
     void run(http::request<http::string_body>);
     void do_write(http::request<http::string_body> request);
     void do_close();
-    http::response<http::string_body> get_response();
-    bool get_status();
+    const http::response<http::string_body> get_response();
+    const bool get_status();
 
 };
 
