@@ -1,23 +1,22 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QWidget>
-#include <QProcess>
-#include <QKeyEvent>
-#include <QFileDialog>
+#include <QAction>
 #include <QDir>
-#include <QPixmap>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QKeyEvent>
+#include <QMainWindow>
 #include <QMenu>
 #include <QMenuBar>
-#include <QAction>
 #include <QObject>
-#include <QInputDialog>
+#include <QPixmap>
+#include <QProcess>
+#include <QWidget>
 #include <map>
 
 #include "Commands.h"
 #include "ui_MainWindow.h"
-
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -26,7 +25,7 @@ class MainWindow : public QMainWindow {
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+   private slots:
     void on_signin_signup_button_clicked();
 
     void on_signup_haveAcc_button_clicked();
@@ -61,18 +60,16 @@ private slots:
 
     void on_send_button_clicked();
 
-private:
+   private:
     Ui::MainWindow ui;
     Commands *cmd;
     User user;
     Chat chat;
     Message msg;
     std::vector<Friend> friends;
-    std::map <QString, Friend> contact;
+    std::map<QString, Friend> contact;
 
     QString path_to_avatar;
-
-
 };
 
 #endif  // MAINWINDOW_H

@@ -52,14 +52,14 @@ if (QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(Client)
 endif ()
 
-#enable_testing()
-#find_package(GTest REQUIRED)
-#include_directories(${GTEST_INCLUDE_DIRS})
+enable_testing()
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
 
-#add_executable(tests test/mainTest.cpp ${PROJECT_SOURCES})
-#target_link_libraries(tests ${GTEST_LIBRARIES} ${Boost_LIBRARIES} Qt${QT_VERSION_MAJOR}::Widgets)
-#set_target_properties(tests PROPERTIES
- #       MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-  #      MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-   #     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
+add_executable(tests test/mainTest.cpp ${PROJECT_SOURCES})
+target_link_libraries(tests ${GTEST_LIBRARIES} ${Boost_LIBRARIES} Qt${QT_VERSION_MAJOR}::Widgets)
+set_target_properties(tests PROPERTIES
+        MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
+        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
 

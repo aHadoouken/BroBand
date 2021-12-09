@@ -1,24 +1,21 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <iostream>
-#include <string>
 #include <QString>
-
-#include <boost/bind/bind.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
-#include <boost/asio/strand.hpp>
+#include <boost/bind/bind.hpp>
+#include <iostream>
+#include <string>
 #include <thread>
-#include <boost/asio.hpp>
-
 
 using tcp = boost::asio::ip::tcp;
-namespace beast = boost::beast;         // from <boost/beast.hpp>
-namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
-namespace net = boost::asio;            // from <boost/asio.hpp>
-
+namespace beast = boost::beast;       // from <boost/beast.hpp>
+namespace http = boost::beast::http;  // from <boost/beast/http.hpp>
+namespace net = boost::asio;          // from <boost/asio.hpp>
 
 class Client {
    private:
@@ -47,9 +44,8 @@ class Client {
     void run(http::request<http::string_body>);
     void do_write(http::request<http::string_body> request);
     void do_close();
-    const http::response<http::string_body>  get_response();
+    http::response<http::string_body> get_response();
     bool get_status();
-
 };
 
 #endif  // CLIENT_H

@@ -2,7 +2,9 @@
 #define USERS_H
 
 #include <QString>
+#include <array>
 #include <cstdint>
+#include <vector>
 
 typedef struct Chat {
     uint64_t id;

@@ -4,6 +4,7 @@
 #include <QQueue>
 #include <QThread>
 #include <map>
+
 #include "Client.h"
 #include "Structs.h"
 #include "handlers.h"
@@ -16,24 +17,13 @@ class Commands : public QThread {
     ~Commands();
 
    signals:
-    void signIn();
-    void signUp();
-    void serchUser();
-    void addUser();
-    void receiveMessage(QString);
-    void setUsername(QString);
-    void setUserId(QString);
-    void reconnect();
-
     void reg_error_gen(QString);
     void log_error_gen(QString);
     void find_friend_error_gen(QString);
     void create_chat_error_gen(QString);
     void send_message_error_gen(QString);
 
-
    public:
-
     void run();
     void disconnect();
     void stop_connect();
@@ -46,8 +36,9 @@ class Commands : public QThread {
     void find_friend(Friend &);
     void create_chat(Chat &);
     void send_message(Message &);
+
    private:
-    Client* client;
+    Client *client;
     Handlers *handlers;
     bool status;
 };

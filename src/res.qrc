@@ -27,7 +27,7 @@
         <file>Resources/del.png</file>
         <file>Resources/msg.png</file>
         <file>Resources/logo.png</file>
-	<file>Resources/log_out.png</file>
+        <file>Resources/log_out.png</file>
         <file>Resources/exit.png</file>
     </qresource>
     <qresource prefix="/sounds">
