@@ -1,8 +1,10 @@
 #include "Exceptions.h"
 #include "Connection.h"
+#include <boost/json/basic_parser.hpp>
 
 Connection::Connection(tcp::socket &&socket, Handlers &handlers)
         : stream_(std::move(socket)), handlers_(handlers) {
+    //parser.body_limit(1024*1024*10);
 }
 
 int Connection::Start() {
@@ -13,7 +15,6 @@ int Connection::Start() {
 
 void Connection::DoRead() {
     request_ = {};
-
     http::async_read(stream_, buffer_, request_,
                      beast::bind_front_handler(
                              &Connection::HandleRead,
@@ -43,9 +44,9 @@ void Connection::HandleRead(beast::error_code e,
                             std::size_t bytes_transferred) {
     if (e == http::error::end_of_stream)
         return DoClose();
-
+    // request_ = parser.release();
     std::cout << "Request target: " << request_.target() << std::endl;
-    //std::cout << "Request body: " << std::endl << request_.body() << std::endl;
+    std::cout << "Request body: " << request_.body() << std::endl;
 
     if (!e) {
         http::response<http::string_body> res{http::status::bad_request,
@@ -106,7 +107,9 @@ void Connection::HandleRead(beast::error_code e,
             res.body() = ex.what();
         }
 
-        //std::cout << "Response body: " << std::endl << res.body() << std::endl;
+        std::cout << "Response status: " << std::endl << res.reason()<< std::endl;
+        std::cout << "Response body: " << std::endl << res.body() << std::endl;
+        std::cout << "======================================================="<< std::endl;
 
         auto sp = std::make_shared<http::message<false, http::string_body>>(
                 std::move(res));
@@ -118,5 +121,8 @@ void Connection::HandleRead(beast::error_code e,
                                   &Connection::HandleWrite,
                                   shared_from_this(),
                                   sp->need_eof()));
+    } else {
+        std::cout << "Error: " << e << "\n";
+        return DoClose();
     }
 }

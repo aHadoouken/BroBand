@@ -6,12 +6,15 @@
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/config.hpp>
+#include <torch/script.h>
 
 #include "db_implementation.h"
+#include "detecting.h"
 
 #define AVATARS "/home/alex/mail_cpp/Avatars/"
 #define IMAGES "/home/alex/mail_cpp/Images/"
 #define DB_CONFIG "/home/alex/mail_cpp/Boost_test/db_config.cfg"
+#define MODEL "../server/model/annotation_resnet34_porn_model.pt"
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
@@ -20,7 +23,9 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 class Handlers {
 public:
-    Handlers (): database(DB_CONFIG) {};
+    Handlers (): database(DB_CONFIG) {
+        pornDetector.load_model(MODEL);
+    };
 
     http::response <http::string_body>
     AddUser(http::request <http::string_body> request);
@@ -48,6 +53,8 @@ public:
 
 private:
     PostgresDB database;
+
+    PornImageDetector pornDetector;
 
     std::string GetUserBody(User user);
 

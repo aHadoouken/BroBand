@@ -50,6 +50,8 @@ private:
 
     http::request<http::string_body> request_;
 
+    http::parser<true, http::string_body> parser;
+
     std::shared_ptr<void> res_;
 
 };

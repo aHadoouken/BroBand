@@ -15,26 +15,12 @@
 #include "Connection.h"
 #include "Exceptions.h"
 #include "Handlers.h"
-#include "Router.h"
 #include "Server.h"
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
-
-TEST(SERVER_TEST, server) {
-
-    Server s;
-
-    EXPECT_EQ(s.Run(), 0);
-}
-
-TEST(CONNECTION_TEST, connection) {
-
-    Connection conn;
-    EXPECT_EQ(conn.Start(), 0);
-}
 
 TEST(HANDLERS_TEST, AddChat) {
 
@@ -100,20 +86,6 @@ TEST(HANDLERS_TEST, GetUser) {
     EXPECT_EQ(response_real.body(), "");
 }
 
-TEST(ROUTING_TEST, AddHandler) {
-
-    Handlers hand;
-
-    Router<Handlers,
-            http::response<http::string_body>,
-            http::request <http::string_body>> router;
-
-    http::request <http::string_body> req;
-
-    router.AddHandler("GetUser", hand);
-
-//    router.ProcessRoute("GetUser", req);
-}
 
 int main(int argc, char *argv[]) {
 

@@ -55,15 +55,11 @@ std::string Handlers::GetUserBody(User user) {
 
 std::string Handlers::GetChatBody(Chat chat) {
     json::value responseValue = {
-            {"chat",
-             {
                      {"chat_id", chat.id},
                      {"chat_name", chat.chat_name},
                      {"created_at", chat.created_at},
                      {"total_messages", chat.total_messages},
                      {"users_id", json::value_from(chat.users_id)}
-             }
-            }
     };
     return json::serialize(responseValue);
 }
@@ -119,7 +115,7 @@ Handlers::AddUser(http::request<http::string_body> request) {
     userForm.login = login;
     userForm.password = password;
     if (!avatarBase64.empty()) {
-        userForm.profile_avatar = AVATARS + login + ".png";
+        userForm.profile_avatar = AVATARS + login + ".jpg";
     } else {
         userForm.profile_avatar = "";
     }
@@ -127,6 +123,15 @@ Handlers::AddUser(http::request<http::string_body> request) {
     auto user = database.AddUser(userForm);
     // Сохраняем картинку после добавления юзера
     if (!avatarBase64.empty()) {
+        cv::Mat img = pornDetector.load_img(avatarBase64);
+        // предобработка
+        torch::Tensor img_tensor = pornDetector.preproccesing(img);
+        // прогоняем по сетке изображение
+        Probability probability = pornDetector.forward(img_tensor);
+        std::cout << probability;
+        // блюрим при необходимости
+        avatarBase64 = pornDetector.blurring();
+        //Сохраняем
         std::string avatarBinary;
         size_t size = beast::detail::base64::decoded_size(avatarBase64.size());
         avatarBinary.resize(size);
@@ -163,6 +168,7 @@ Handlers::AddChat(http::request<http::string_body> request) {
     auto chat = database.AddChat(chatForm);
 
     std::string responseBody = GetChatBody(chat);
+    responseBody = "{\"chat\":" + responseBody + "}";
 
     response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
     response.set(http::field::content_length, std::to_string(responseBody.size()));
@@ -216,7 +222,7 @@ Handlers::AddMessage(http::request<http::string_body> request) {
     if (!attachmentBase64.empty()) {
         boost::uuids::random_generator generator;
         boost::uuids::uuid uuid1 = generator();
-        msgForm.attachment = IMAGES + to_string(uuid1) + ".png";
+        msgForm.attachment = IMAGES + to_string(uuid1) + ".jpg";
     } else {
         msgForm.attachment = "";
     }
@@ -285,6 +291,7 @@ Handlers::GetChat(http::request<http::string_body> request) {
     auto chat = database.GetChatByID(chat_id);
 
     std::string responseBody = GetChatBody(chat);
+    responseBody = "{\"chat\":" + responseBody + "}";
 
     http::response<http::string_body> response;
     response.set(http::field::server, BOOST_BEAST_VERSION_STRING);
