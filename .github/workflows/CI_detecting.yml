@@ -12,7 +12,7 @@ jobs:
       - uses: Dovyski/setup-opencv-action@v1
         with:
           opencv-version: '4.5.4'
-      - run: sudo apt-get install -y libgtest-dev gcovr lcov
+      - run: sudo apt-get install -y libgtest-dev gcovr libboost-all-dev
       - run: cd detecting && sudo wget https://download.pytorch.org/libtorch/nightly/cpu/libtorch-shared-with-deps-latest.zip
       - run: cd detecting && sudo unzip libtorch-shared-with-deps-latest.zip
       - run: cd detecting && pip install opencv-python #&& sudo apt-get install libopencv-dev
