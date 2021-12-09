@@ -15,7 +15,9 @@ jobs:
 #       - run: sudo apt-get install -y libgtest-dev gcovr libboost-all-dev
       - run: cd detecting && sudo wget https://download.pytorch.org/libtorch/nightly/cpu/libtorch-shared-with-deps-latest.zip
       - run: cd detecting && sudo unzip libtorch-shared-with-deps-latest.zip
-      - run: cd detecting && pip install opencv-python
+      - run: sudo wget http://downloads.sourceforge.net/project/opencvlibrary/opencv-unix/4.5.4/opencv-4.5.4.tar.gz
+      - run: tar -xvf opencv-4.5.4tar.bz2
+      - run: cd opencv-4.5.4/ && mkdir build && cd build && cmake -D WITH_QT=ON -D WITH_XINE=ON -D WITH_OPENGL=ON -D WITH_TBB=ON .. && make && sudo make install && sudo ldconfig
       - run: sudo wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz && sudo tar -xf release-1.7.0.tar.gz && rm -rf release-1.7.0.tar.gz
       - run: cd googletest-release-1.7.0
       - run: sudo cmake
