@@ -7,6 +7,7 @@ net::io_context ioc;
 Commands::Commands() {
     client = new Client(ioc);
     handlers = new Handlers();
+    status = false;
 }
 
 Commands::~Commands() {
@@ -54,13 +55,13 @@ QString Commands::check_log_form_task(const QString login, const QString passwor
                                     "Пожалуйста, введите пароль.",
                                     "completed"};
 
-    if (login.isEmpty() && password.isEmpty()) {
+    if (login.isEmpty() || password.isEmpty()) {
        return signin_error[0];
     }
     else if (login.isEmpty()) {
         return signin_error[1];
     }
-    else if (login.isEmpty()) {
+    else if (password.isEmpty()) {
         return signin_error[2];
     }
     else {

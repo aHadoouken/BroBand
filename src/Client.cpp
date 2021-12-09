@@ -1,7 +1,5 @@
 #include "Client.h"
 
-void fail(beast::error_code ec, char const* what) { std::cerr << what << ": " << ec.message() << "\n"; }
-
 Client::Client(net::io_context& ioc) : resolver_(net::make_strand(ioc)), stream_(net::make_strand(ioc)) {
     status = false;
 }

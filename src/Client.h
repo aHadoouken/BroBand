@@ -29,7 +29,7 @@ class Client {
 
     http::request<http::string_body> request_;
     http::response<http::string_body> response_;
-    const std::string server = "af66-195-19-47-102.ngrok.io";
+    const std::string server = "1940-195-19-47-39.ngrok.io";
     const std::string port = "http";
 
     bool status;
@@ -47,8 +47,8 @@ class Client {
     void run(http::request<http::string_body>);
     void do_write(http::request<http::string_body> request);
     void do_close();
-    const http::response<http::string_body> get_response();
-    const bool get_status();
+    const http::response<http::string_body>  get_response();
+    bool get_status();
 
 };
 
