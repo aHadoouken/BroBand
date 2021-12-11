@@ -75,14 +75,16 @@ PostgresDB::FillChatInfoUsers(Chat &chat, const pqxx::result &result) {
 void PostgresDB::FillMessage(Message &message, const pqxx::result &result) {
     message.id = result[0][0].as<unsigned long>();
     message.sender_id = result[0][1].as<unsigned long>();
-    message.chat_id = result[0][2].as<unsigned long>();
-    if (!result[0][3].is_null()) {
-        message.text = result[0][3].as<std::string>();
+    message.sender_name = result[0][2].as<std::string>();
+    message.chat_id = result[0][3].as<unsigned long>();
+    message.chat_name = result[0][4].as<std::string>();
+    if (!result[0][5].is_null()) {
+        message.text = result[0][5].as<std::string>();
     }
-    if (!result[0][4].is_null()) {
-        message.attachment = result[0][4].as<std::string>();
+    if (!result[0][6].is_null()) {
+        message.attachment = result[0][6].as<std::string>();
     }
-    message.created_at = result[0][5].as<std::string>();
+    message.created_at = result[0][7].as<std::string>();
 }
 
 void PostgresDB::FillMessages(std::vector<Message> &messages,
@@ -93,14 +95,16 @@ void PostgresDB::FillMessages(std::vector<Message> &messages,
     for (int i = 0; i < result.size(); i++) {
         messages[i].id = result[i][0].as<unsigned long>();
         messages[i].sender_id = result[i][1].as<unsigned long>();
-        messages[i].chat_id = result[i][2].as<unsigned long>();
-        if (!result[i][3].is_null()) {
-            messages[i].text = result[i][3].as<std::string>();
+        messages[i].sender_name = result[i][2].as<std::string>();
+        messages[i].chat_id = result[i][3].as<unsigned long>();
+        messages[i].chat_name = result[i][4].as<std::string>();
+        if (!result[i][5].is_null()) {
+            messages[i].text = result[i][5].as<std::string>();
         }
-        if (!result[i][4].is_null()) {
-            messages[i].attachment = result[i][4].as<std::string>();
+        if (!result[i][6].is_null()) {
+            messages[i].attachment = result[i][6].as<std::string>();
         }
-        messages[i].created_at = result[i][5].as<std::string>();
+        messages[i].created_at = result[i][7].as<std::string>();
     }
 }
 
@@ -283,7 +287,7 @@ Message PostgresDB::AddMessage(MessageForm msg) {
             "WHERE id = %lu;"
             "INSERT INTO messages(sender_id, chat_id, text, attachment, created_at)"
             " VALUES (%lu, %lu, %s, %s, now())"
-            " returning *;")
+            " returning id;")
                        % msg.chat_id
                        % msg.sender_id
                        % msg.chat_id
@@ -294,6 +298,18 @@ Message PostgresDB::AddMessage(MessageForm msg) {
     pqxx::result result = W.exec(sql);
     W.commit();
 
+    auto id = result[0][0].as<unsigned long>();
+    sql = (boost::format(
+            "SELECT m.id, m.sender_id, users.name, m.chat_id, chats.chat_name, "
+            "m.text, m.attachment, m.created_at "
+            "FROM messages as m "
+            "left join chats on (m.chat_id = chats.id) "
+            "left join users on (m.sender_id = users.user_id) "
+            "where m.id = %lu;")
+                       % id).str();
+    pqxx::nontransaction N(connect);
+    result = N.exec(sql);
+
     Message message;
     FillMessage(message, result);
     return message;
@@ -301,7 +317,12 @@ Message PostgresDB::AddMessage(MessageForm msg) {
 
 std::vector<Message> PostgresDB::GetChatMessages(unsigned long chat_id) {
     std::string sql = (boost::format(
-            "SELECT * FROM messages WHERE chat_id=%lu;")
+            "SELECT m.id, m.sender_id, users.name, m.chat_id, chats.chat_name, "
+            "m.text, m.attachment, m.created_at "
+            "FROM messages as m "
+            "left join chats on (m.chat_id = chats.id) "
+            "left join users on (m.sender_id = users.user_id) "
+            "where chats.id = %lu;")
                        % chat_id).str();
 
     pqxx::nontransaction N(connect);

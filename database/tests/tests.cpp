@@ -128,14 +128,18 @@ TEST(DBLibTest, AddMessageValidInputs) {
     msgForm.text = "msg";
     EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
     EXPECT_EQ(msgForm.sender_id, msg.sender_id);
+    EXPECT_EQ("name1", msg.sender_name);
     EXPECT_EQ(msgForm.chat_id, msg.chat_id);
+    EXPECT_EQ("chat1", msg.chat_name);
     EXPECT_EQ(msgForm.text, msg.text);
     EXPECT_EQ(msgForm.attachment, msg.attachment);
     msgForm.attachment = "attachment";
     msgForm.text = "";
     EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
     EXPECT_EQ(msgForm.sender_id, msg.sender_id);
+    EXPECT_EQ("name1", msg.sender_name);
     EXPECT_EQ(msgForm.chat_id, msg.chat_id);
+    EXPECT_EQ("chat1", msg.chat_name);
     EXPECT_EQ(msgForm.text, msg.text);
     EXPECT_EQ(msgForm.attachment, msg.attachment);
     msgForm.sender_id = 4;
@@ -144,7 +148,9 @@ TEST(DBLibTest, AddMessageValidInputs) {
     msgForm.text = "msg2";
     EXPECT_NO_THROW(msg = postgres.AddMessage(msgForm));
     EXPECT_EQ(msgForm.sender_id, msg.sender_id);
+    EXPECT_EQ("name4", msg.sender_name);
     EXPECT_EQ(msgForm.chat_id, msg.chat_id);
+    EXPECT_EQ("chat2", msg.chat_name);
     EXPECT_EQ(msgForm.text, msg.text);
     EXPECT_EQ(msgForm.attachment, msg.attachment);
 }
@@ -177,7 +183,9 @@ TEST(DBLibTest, GetChatMessages) {
     EXPECT_NO_THROW(msgs = postgres.GetChatMessages(1));
     EXPECT_EQ(msgs[0].id, 1);
     EXPECT_EQ(msgs[0].sender_id, 1);
+    EXPECT_EQ(msgs[0].sender_name, "name1");
     EXPECT_EQ(msgs[0].chat_id, 1);
+    EXPECT_EQ(msgs[0].chat_name, "chat1");
     EXPECT_EQ(msgs[0].text, "message1 1");
     EXPECT_EQ(msgs[0].attachment, "/image/1_1");
     EXPECT_EQ(msgs[1].id, 2);
@@ -212,7 +220,9 @@ TEST(DBLibTest, ExtractMessageByID) {
     EXPECT_NO_THROW(msg = postgres.ExtractMessageByID(msgIDTest));
     EXPECT_EQ(msgTest.id, msg.id);
     EXPECT_EQ(msgTest.sender_id, msg.sender_id);
+    EXPECT_EQ("name1", msg.sender_name);
     EXPECT_EQ(msgTest.chat_id, msg.chat_id);
+    EXPECT_EQ("chat2", msg.chat_name);
     EXPECT_EQ(msgTest.text, msg.text);
     EXPECT_EQ(msgTest.attachment, msg.attachment);
     EXPECT_EQ(msgTest.created_at, msg.created_at);

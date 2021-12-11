@@ -40,7 +40,9 @@ typedef struct UserLogin {
 typedef struct Message {
     unsigned long id;
     unsigned long sender_id;
+    std::string sender_name;
     unsigned long chat_id;
+    std::string chat_name;
     std::string text;
     std::string attachment;
     std::string created_at;
