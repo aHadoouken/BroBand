@@ -8,7 +8,7 @@ project(tests)
 #add_link_options( -O0 -lgcov --coverage)
 
 add_compile_options(-pthread)
-list(APPEND CMAKE_PREFIX_PATH "/home/d3vyatk4/libtorch")
+list(APPEND CMAKE_PREFIX_PATH "/home/runner/work/BroBand/BroBand/detecting/libtorch")
 
 include_directories("../include")
 
