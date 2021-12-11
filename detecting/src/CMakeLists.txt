@@ -10,6 +10,7 @@ list(APPEND CMAKE_PREFIX_PATH "/home/runner/work/BroBand/BroBand/detecting/libto
 
 # добавляем поиск файлов в директории include
 include_directories("../include")
+include_directories("../src")
 
 find_package(Torch REQUIRED)
 
