@@ -32,11 +32,6 @@ typedef struct ChatForm {
     std::vector<unsigned long> users_id;
 } ChatForm;
 
-typedef struct UserLogin {
-    std::string login;
-    std::string password;
-} UserLogin;
-
 typedef struct Message {
     unsigned long id;
     unsigned long sender_id;

@@ -13,7 +13,7 @@ public:
 
     User GetUserByLogin(const std::string &login) override;
 
-    bool Authorization(UserLogin userLogin) override;
+    std::string GetPassword(const std::string &login) override;
 
     Chat AddChat(ChatForm chatForm) override;
 
@@ -23,13 +23,8 @@ public:
 
     std::vector<Message> GetChatMessages(unsigned long chat_id) override;
 
-    std::vector<unsigned long>
-    ExtractChatMessagesID(unsigned long chat_id, unsigned long first,
-                          unsigned long last) override;
-
-    Message ExtractMessageByID(unsigned long id) override;
-
-    std::vector<unsigned long> LastMessagesByUserID(unsigned long id) override;
+    std::vector<Message> GetChatMessagesAfterID(unsigned long chat_id,
+                                                unsigned long msg_id) override;
 
 private:
     pqxx::connection connect;

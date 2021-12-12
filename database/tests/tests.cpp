@@ -72,16 +72,15 @@ TEST(DBLibTest, GetUserByLoginTest) {
                  pqxx::plpgsql_no_data_found);
 }
 
-TEST(DBLibTest, AuthorizationTest) {
+TEST(DBLibTest, GetPassword) {
     PostgresDB postgres(CONFIG);
-    UserLogin userLogin;
-    userLogin.login = "user1";
-    userLogin.password = "password1";
-    EXPECT_TRUE(postgres.Authorization(userLogin));
-    userLogin.password = "password122";
-    EXPECT_FALSE(postgres.Authorization(userLogin));
-    userLogin.login = "user1123123123";
-    EXPECT_THROW(postgres.Authorization(userLogin),
+    std::string login = "user1";
+    std::string real_password = "password1";
+    std::string password;
+    EXPECT_NO_THROW(password = postgres.GetPassword(login));
+    EXPECT_EQ(password, real_password);
+    login = "user1123123123";
+    EXPECT_THROW(postgres.GetPassword(login),
                  pqxx::plpgsql_no_data_found);
 }
 
@@ -178,64 +177,37 @@ TEST(DBLibTest, AddMessageInvalidInputs) {
 
 TEST(DBLibTest, GetChatMessages) {
     PostgresDB postgres(CONFIG);
-    unsigned long chatIDTest = 4;
+    unsigned long chatIDTest = 1;
     std::vector<Message> msgs;
-    EXPECT_NO_THROW(msgs = postgres.GetChatMessages(1));
+    EXPECT_NO_THROW(msgs = postgres.GetChatMessages(chatIDTest));
     EXPECT_EQ(msgs[0].id, 1);
     EXPECT_EQ(msgs[0].sender_id, 1);
     EXPECT_EQ(msgs[0].sender_name, "name1");
-    EXPECT_EQ(msgs[0].chat_id, 1);
+    EXPECT_EQ(msgs[0].chat_id, chatIDTest);
     EXPECT_EQ(msgs[0].chat_name, "chat1");
     EXPECT_EQ(msgs[0].text, "message1 1");
     EXPECT_EQ(msgs[0].attachment, "/image/1_1");
     EXPECT_EQ(msgs[1].id, 2);
     EXPECT_EQ(msgs[1].sender_id, 2);
-    EXPECT_EQ(msgs[1].chat_id, 1);
+    EXPECT_EQ(msgs[1].chat_id, chatIDTest);
     EXPECT_TRUE(msgs[1].text.empty());
     EXPECT_EQ(msgs[1].attachment, "/image/2_1");
 }
 
-TEST(DBLibTest, GetChatMessagesID) {
+TEST(DBLibTest, GetChatMessagesAfterID) {
     PostgresDB postgres(CONFIG);
-    unsigned long chatIDTest = 4;
-    std::vector<unsigned long> msgID;
-    std::vector<unsigned long> msgIDTest = {2, 3, 10};
-    EXPECT_NO_THROW(msgID = postgres.ExtractChatMessagesID(chatIDTest, 0, 3));
-    EXPECT_EQ(msgIDTest, msgID);
-    EXPECT_THROW(msgID = postgres.ExtractChatMessagesID(chatIDTest, 0, 0),
-                 InvalidInputs);
-}
-
-TEST(DBLibTest, ExtractMessageByID) {
-    PostgresDB postgres(CONFIG);
-    unsigned long msgIDTest = 4;
-    Message msg, msgTest;
-    msgTest.id = msgIDTest;
-    msgTest.sender_id = 1;
-    msgTest.chat_id = 2;
-    msgTest.text = "TestMessage";
-    msgTest.attachment = {"att1", "att2"};
-    msgTest.created_at = "03-02-1998 13-15-07";
-
-    EXPECT_NO_THROW(msg = postgres.ExtractMessageByID(msgIDTest));
-    EXPECT_EQ(msgTest.id, msg.id);
-    EXPECT_EQ(msgTest.sender_id, msg.sender_id);
-    EXPECT_EQ("name1", msg.sender_name);
-    EXPECT_EQ(msgTest.chat_id, msg.chat_id);
-    EXPECT_EQ("chat2", msg.chat_name);
-    EXPECT_EQ(msgTest.text, msg.text);
-    EXPECT_EQ(msgTest.attachment, msg.attachment);
-    EXPECT_EQ(msgTest.created_at, msg.created_at);
-}
-
-TEST(DBLibTest, LastMessagesByUserID) {
-    PostgresDB postgres(CONFIG);
-    unsigned long userIDTest = 4;
-    std::vector<unsigned long> msgTest = {5, 7, 10};
-    std::vector<unsigned long> msg;
-
-    EXPECT_NO_THROW(msg = postgres.LastMessagesByUserID(userIDTest));
-    EXPECT_EQ(msg, msgTest);
+    unsigned long chatIDTest = 3;
+    std::vector<Message> msgs;
+    EXPECT_NO_THROW(msgs = postgres.GetChatMessagesAfterID(chatIDTest, 5));
+    EXPECT_EQ(msgs[0].id, 6);
+    EXPECT_EQ(msgs[0].sender_id, 4);
+    EXPECT_EQ(msgs[0].sender_name, "name4");
+    EXPECT_EQ(msgs[0].chat_id, chatIDTest);
+    EXPECT_EQ(msgs[0].chat_name, "chat3");
+    EXPECT_EQ(msgs[0].text, "message3 3");
+    EXPECT_EQ(msgs[0].attachment, "/image/2_3");
+    EXPECT_NO_THROW(msgs = postgres.GetChatMessagesAfterID(chatIDTest, 6));
+    EXPECT_EQ(msgs.size(), 0);
 }
 
 int main(int argc, char **argv) {

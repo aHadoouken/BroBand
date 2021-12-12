@@ -182,13 +182,10 @@ User PostgresDB::GetUserByLogin(const std::string &login) {
     return user;
 }
 
-bool PostgresDB::Authorization(UserLogin userLogin) {
-    if (userLogin.login.empty() || userLogin.password.empty()) {
-        throw InvalidInputs();
-    }
+std::string PostgresDB::GetPassword(const std::string &login) {
     std::string sql = (boost::format(
             "SELECT password FROM users WHERE login='%s';")
-                       % userLogin.login).str();
+                       % login).str();
 
     pqxx::nontransaction N(connect);
     pqxx::result result = N.exec(sql);
@@ -196,11 +193,7 @@ bool PostgresDB::Authorization(UserLogin userLogin) {
         throw pqxx::plpgsql_no_data_found("User not found");
     }
     auto password = result[0][0].as<std::string>();
-    if (password == userLogin.password) {
-        return true;
-    } else {
-        return false;
-    }
+    return password;
 }
 
 Chat PostgresDB::AddChat(ChatForm chatForm) {
@@ -327,9 +320,6 @@ std::vector<Message> PostgresDB::GetChatMessages(unsigned long chat_id) {
 
     pqxx::nontransaction N(connect);
     pqxx::result result = N.exec(sql);
-    if (result.empty()) {
-        throw pqxx::plpgsql_no_data_found("Messages not found");
-    }
     std::vector<Message> messages;
     messages.resize(result.size());
 
@@ -338,16 +328,24 @@ std::vector<Message> PostgresDB::GetChatMessages(unsigned long chat_id) {
     return messages;
 }
 
-std::vector<unsigned long>
-PostgresDB::ExtractChatMessagesID(unsigned long chat_id, unsigned long first,
-                                  unsigned long last) {
-    throw NotImplemented();
-}
+std::vector<Message> PostgresDB::GetChatMessagesAfterID(unsigned long chat_id,
+                                            unsigned long msg_id){
+    std::string sql = (boost::format(
+            "SELECT m.id, m.sender_id, users.name, m.chat_id, chats.chat_name, "
+            "m.text, m.attachment, m.created_at "
+            "FROM messages as m "
+            "left join chats on (m.chat_id = chats.id) "
+            "left join users on (m.sender_id = users.user_id) "
+            "where chats.id = %lu and m.id > %lu;")
+                       % chat_id
+                       % msg_id).str();
 
-Message PostgresDB::ExtractMessageByID(unsigned long id) {
-    throw NotImplemented();
-}
+    pqxx::nontransaction N(connect);
+    pqxx::result result = N.exec(sql);
+    std::vector<Message> messages;
+    messages.resize(result.size());
 
-std::vector<unsigned long> PostgresDB::LastMessagesByUserID(unsigned long id) {
-    throw NotImplemented();
+    FillMessages(messages, result);
+
+    return messages;
 }
