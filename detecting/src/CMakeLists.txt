@@ -9,10 +9,10 @@ add_compile_options(-pthread)
 list(APPEND CMAKE_PREFIX_PATH "/home/runner/work/BroBand/BroBand/detecting/libtorch")
 
 # добавляем поиск файлов в директории include
-include_directories("/home/runner/work/BroBand/BroBand/detecting/include")
-include_directories("/home/runner/work/BroBand/BroBand/detecting/src")
+include_directories("../include")
 
 find_package(Torch REQUIRED)
+include_directories("../libtorch/include")
 
 find_package(OpenCV REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
