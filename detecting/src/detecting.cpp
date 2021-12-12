@@ -153,7 +153,6 @@ cv::Mat PornImageDetector::load_img(const std::string &base64_code) {
         // если не получилось, работаем с BGR
         std::cout << "Using BGR format for image\n";
     }
-    
     return img;
 }
 
@@ -183,8 +182,7 @@ Probability PornTextDetector::forward(Token &data) {
     throw NotImplemented();
 }
 
-std::vector<std::string> PornTextDetector::get_stopwords() {
-    
+std::vector<std::string> PornTextDetector::get_stopwords() {    
     std::ifstream fin(STOPWORDS);// открыли файл для чтения
     char buffer[MAGIC_N];
     fin.getline(buffer, MAGIC_N);
