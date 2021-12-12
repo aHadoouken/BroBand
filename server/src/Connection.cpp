@@ -77,6 +77,9 @@ void Connection::HandleRead(beast::error_code e,
             } else if (target == "/chat_messages" &&
                        request_.method() == http::verb::get) {
                 res = handlers_.GetChatMessages(request_);
+            } else if (target == "/chat_last_messages" &&
+                       request_.method() == http::verb::get) {
+                res = handlers_.GetChatMessagesAfterID(request_);
             } else {
                 res.set(http::field::content_type, "application/json");
                 res.result(http::status::not_found);

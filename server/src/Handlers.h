@@ -49,6 +49,9 @@ public:
     GetChatMessages(http::request <http::string_body> request);
 
     http::response <http::string_body>
+    GetChatMessagesAfterID(http::request <http::string_body> request);
+
+    http::response <http::string_body>
     GetMessage(http::request <http::string_body> request);
 
 private:
@@ -61,4 +64,8 @@ private:
     std::string GetChatBody(Chat chat);
 
     std::string GetMessageBody(Message msg);
+
+    bool GetMd5(std::string &str_md5, const char * const buffer, size_t buffer_size);
+
+    std::map<std::string, std::string> ParseParams(const std::string& url);
 };
