@@ -39,7 +39,7 @@ TEST(IMAGE_PORN_DETECTOR, successeful_load_model) {
     // загружаем модель
     EXPECT_EQ(img_detector.load_model(MODEL),
               0
-              );
+    );
 }
 
 TEST(IMAGE_PORN_DETECTOR, bad_load_model) {
@@ -68,7 +68,7 @@ TEST(IMAGE_PORN_DETECTOR, bad_load_image) {
     // читаем изображение
     EXPECT_THROW(cv::Mat img = img_detector.load_img(""),
                  cv::Exception
-                    );
+    );
 }
 
 TEST(IMAGE_PORN_DETECTOR, successeful_permutation_channels) {
@@ -86,11 +86,10 @@ TEST(IMAGE_PORN_DETECTOR, bad_permutation_channels) {
     PornImageDetector img_detector;
 
     // объект с 2-мя каналами
-    cv::Mat img(2,2, CV_8UC2, cv::Scalar(0,0,255));
+    cv::Mat img(2, 2, CV_8UC2, cv::Scalar(0, 0, 255));
 
     EXPECT_THROW(img_detector.permutation_channels(img), std::runtime_error);
 }
-
 
 
 TEST(IMAGE_PORN_DETECTOR, full_way) {
