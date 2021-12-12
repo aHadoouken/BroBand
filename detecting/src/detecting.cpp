@@ -148,8 +148,7 @@ cv::Mat PornImageDetector::load_img(const std::string &base64_code) {
     try {
         // BGR to RGB
         permutation_channels(img);
-    }
-    catch (const cv::Exception &ex) {
+    } catch (const cv::Exception &ex) {
         // если не получилось, работаем с BGR
         std::cout << "Using BGR format for image\n";
     }
