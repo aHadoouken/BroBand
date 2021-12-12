@@ -1,7 +1,6 @@
 //
 // Created by d3vyatk4 on 15.11.2021.
 //
-
 #include "detecting.h"
 #include "Exception.h"
 #include <opencv2/opencv.hpp>
