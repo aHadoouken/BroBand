@@ -45,7 +45,7 @@ jobs:
     - uses: actions/checkout@v2
     - run: sudo apt-get -qq update
     - run: sudo apt-get install cppcheck
-    - run: sudo cppcheck --enable=all --inconclusive ./src
+    - run: sudo cppcheck --enable=all --inconclusive ./detecting/src
 # покрытие
 #   gcovr:
 #     needs: [build-project]
