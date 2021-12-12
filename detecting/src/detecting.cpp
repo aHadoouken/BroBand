@@ -9,7 +9,6 @@
 #include <boost/beast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-
 #define HEIGHT 224
 #define WIDTH 224
 #define MAGIC_N 1234
