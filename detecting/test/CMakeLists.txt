@@ -10,8 +10,8 @@ project(tests)
 add_compile_options(-pthread)
 list(APPEND CMAKE_PREFIX_PATH "/home/runner/work/BroBand/BroBand/detecting/libtorch")
 
-include_directories("../include")
-include_directories("../src")
+include_directories("/home/runner/work/BroBand/BroBand/detecting/include")
+include_directories("/home/runner/work/BroBand/BroBand/detecting/src")
 
 find_package(Torch REQUIRED)
 
