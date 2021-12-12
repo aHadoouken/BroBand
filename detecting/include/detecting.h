@@ -10,6 +10,8 @@
 #include <torch/script.h>
 #include <vector>
 
+typedef std::vector<std::string> Token;
+
 struct Probability {
 
     double porn;
@@ -20,10 +22,6 @@ struct Probability {
 
 public:
     friend std::ostream &operator<<(std::ostream &out, const Probability &prob);
-};
-
-struct Message {
-    std::string text = "";
 };
 
 template<typename T>
@@ -47,17 +45,21 @@ class PornImageDetector : public TorchWrapper<torch::Tensor> {
 private:
     cv::Mat orig_img;
 
-    cv::Mat base642mat(const std::string &base64_code);
+    static cv::Mat base642mat(const std::string &base64_code);
 
-    std::string mat2base64(const cv::Mat &img);
+    static std::string mat2base64(const cv::Mat &img);
 
 public:
 
-    PornImageDetector();
+    PornImageDetector() = default;
+
+    PornImageDetector(const std::string &path_to_model);
+
+    ~PornImageDetector();
 
     cv::Mat load_img(const std::string &base64_code);
 
-    void permutation_channels(cv::Mat &img);
+    static void permutation_channels(cv::Mat &img);
 
     torch::Tensor preproccesing(cv::Mat &img);
 
@@ -66,13 +68,23 @@ public:
     std::string blurring();
 };
 
-class PornTextDetector : public TorchWrapper<Message> {
+class PornTextDetector : public TorchWrapper<Token> {
+private:
+    std::string msg;
+
+    std::vector<std::string> get_stopwords();
+
 public:
-    Probability forward(Message &data) override;
 
-    std::string preproccesing(std::string &text);
+    PornTextDetector();
 
-     std::string text_replace(Message *data);
+    void remove_bad_syms_words(Token &token);
+
+    Probability forward(Token &data) override;
+
+    Token preproccesing(std::string &text);
+
+    std::string text_replace(Token data);
 };
 
 #endif//BROBAND_DETECTING_H
