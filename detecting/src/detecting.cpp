@@ -4,6 +4,7 @@
 
 #include "detecting.h"
 #include "Exception.h"
+
 #include <opencv2/opencv.hpp>// for image proccessing
 #include <torch/script.h>// for torchScript
 #include <boost/beast.hpp>// for base64
@@ -191,12 +192,10 @@ std::vector<std::string> PornTextDetector::get_stopwords() {
     std::string tmp = buffer;
     std::vector<std::string> stopwords;
     boost::split(stopwords, tmp, [](char c) { return c == ' '; });
-    
     return stopwords;
 }
 
 void PornTextDetector::remove_bad_syms_words(Token &token) {
-    
     Token stopwords = get_stopwords();
     Token good_words;
     bool flag = false;
