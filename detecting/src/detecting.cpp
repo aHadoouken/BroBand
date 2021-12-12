@@ -4,16 +4,15 @@
 
 #include "detecting.h"
 #include "Exception.h"
-
-#include <opencv2/opencv.hpp>           // for image proccessing
-#include <torch/script.h>               // for torchScript
-#include <boost/beast.hpp>              // for base64
+#include <opencv2/opencv.hpp>// for image proccessing
+#include <torch/script.h>// for torchScript
+#include <boost/beast.hpp>// for base64
 #include <boost/algorithm/string.hpp>
-#include <fstream>                      // for file
+#include <fstream>// for file
 
-#define HEIGHT 224                      // height of input net's
-#define WIDTH 224                       // width of input net's
-#define MAGIC_N 1234                    // size of symbols in STOPWORDS file
+#define HEIGHT 224// height of input net's
+#define WIDTH 224// width of input net's
+#define MAGIC_N 1234// size of symbols in STOPWORDS file
 
 #define STOPWORDS "../../requirement/STOPWORDS.txt"
 
@@ -190,10 +189,10 @@ Probability PornTextDetector::forward(Token &data) {
 }
 
 std::vector<std::string> PornTextDetector::get_stopwords() {
-    std::ifstream fin(STOPWORDS); // открыли файл для чтения
+    std::ifstream fin(STOPWORDS);// открыли файл для чтения
     char buffer[MAGIC_N];
     fin.getline(buffer, MAGIC_N);
-
+    
     std::string tmp = buffer;
     std::vector<std::string> stopwords;
     boost::split(stopwords, tmp, [](char c) { return c == ' '; });

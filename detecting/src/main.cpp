@@ -11,40 +11,28 @@
 
 int main() {
 
-//    // создаем объект
-//    PornImageDetector img_detector;
-//
-//    // устанавливаем порог
-//    img_detector.set_threshold(0.7);
-//
-//    // загружаем модель
-//    img_detector.load_model(MODEL);
-//
-//    // читаем изображение
-//    cv::Mat img = img_detector.load_img(TEST_IMAGE);
-//
-//    // предобработка
-//    torch::Tensor img_tensor = img_detector.preproccesing(img);
-//
-//    // прогоняем по сетке изображение
-//    Probability probability = img_detector.forward(img_tensor);
-//
-//    std::cout << probability;
-//
-//    // блюрим при необходимости
-//    std::string base64_code = img_detector.blurring();
+    // создаем объект
+    PornImageDetector img_detector;
 
-    PornTextDetector txt_detector;
+    // устанавливаем порог
+    img_detector.set_threshold(0.7);
 
-    std::string txt = "Я, создаю, модель, машииного, обучения, нА С++ В рАмках ЭтогО и тОго. ЭТО!!";
+    // загружаем модель
+    img_detector.load_model(MODEL);
 
-    std::cout << txt << "\n";
+    // читаем изображение
+    cv::Mat img = img_detector.load_img(TEST_IMAGE);
 
-    txt = boost::algorithm::to_lower_copy(txt);
+    // предобработка
+    torch::Tensor img_tensor = img_detector.preproccesing(img);
 
-    std::cout << txt << "\n";
+    // прогоняем по сетке изображение
+    Probability probability = img_detector.forward(img_tensor);
 
-//    auto token = txt_detector.preproccesing(txt);
+    std::cout << probability;
+
+    // блюрим при необходимости
+    std::string base64_code = img_detector.blurring();
 
     return 0;
 }
