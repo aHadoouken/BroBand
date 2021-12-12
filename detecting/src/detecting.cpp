@@ -10,9 +10,9 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>// for file
 
-#define HEIGHT 224// height of input net's
-#define WIDTH 224// width of input net's
-#define MAGIC_N 1234// size of symbols in STOPWORDS file
+#define HEIGHT 224
+#define WIDTH 224
+#define MAGIC_N 1234
 
 #define STOPWORDS "../../requirement/STOPWORDS.txt"
 
@@ -46,8 +46,7 @@ int TorchWrapper<T>::load_model(const std::string &path) {
     try {
         model = torch::jit::load(path);
         // Error - основной класс ошибок
-    }
-    catch (const c10::Error &ex) {
+    } catch (const c10::Error &ex) {
         std::cerr << "Error loading the model\n";
         return 1;
     }
@@ -58,10 +57,6 @@ int TorchWrapper<T>::load_model(const std::string &path) {
 
 PornImageDetector::PornImageDetector(const std::string &path_to_model) {
     load_model(path_to_model);
-}
-
-PornImageDetector::~PornImageDetector() {
-
 }
 
 Probability PornImageDetector::forward(torch::Tensor &img) {
@@ -158,7 +153,7 @@ cv::Mat PornImageDetector::load_img(const std::string &base64_code) {
         // если не получилось, работаем с BGR
         std::cout << "Using BGR format for image\n";
     }
-
+    
     return img;
 }
 
@@ -189,6 +184,7 @@ Probability PornTextDetector::forward(Token &data) {
 }
 
 std::vector<std::string> PornTextDetector::get_stopwords() {
+    
     std::ifstream fin(STOPWORDS);// открыли файл для чтения
     char buffer[MAGIC_N];
     fin.getline(buffer, MAGIC_N);
@@ -196,10 +192,12 @@ std::vector<std::string> PornTextDetector::get_stopwords() {
     std::string tmp = buffer;
     std::vector<std::string> stopwords;
     boost::split(stopwords, tmp, [](char c) { return c == ' '; });
+    
     return stopwords;
 }
 
 void PornTextDetector::remove_bad_syms_words(Token &token) {
+    
     Token stopwords = get_stopwords();
     Token good_words;
     bool flag = false;
