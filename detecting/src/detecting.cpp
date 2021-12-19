@@ -1,5 +1,6 @@
+
 #include "detecting.h"
-#include "Exception.h"
+
 #include <opencv2/opencv.hpp>// for image proccessing
 #include <torch/script.h>// for torchScript
 #include <boost/beast.hpp>// for base64
