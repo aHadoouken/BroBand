@@ -52,8 +52,7 @@ int TorchWrapper<T>::load_model(const std::string &path) {
     try {
         model = torch::jit::load(path);
         // Error - основной класс ошибок
-    }
-    catch (const c10::Error &ex) {
+    } catch (const c10::Error &ex) {
         std::cerr << "Error loading the model\n";
         return 1;
     }
@@ -66,9 +65,7 @@ PornImageDetector::PornImageDetector(const std::string &path_to_model) {
     load_model(path_to_model);
 }
 
-PornImageDetector::~PornImageDetector() {
-
-}
+PornImageDetector::~PornImageDetector() {}
 
 Probability PornImageDetector::forward(torch::Tensor &img) {
     torch::NoGradGuard no_grad;// turn off trainable function
@@ -159,8 +156,7 @@ cv::Mat PornImageDetector::load_img(const std::string &base64_code) {
     try {
         // BGR to RGB
         permutation_channels(img);
-    }
-    catch (const cv::Exception &ex) {
+    } catch (const cv::Exception &ex) {
         // если не получилось, работаем с BGR
         std::cout << "Using BGR format for image\n";
     }
@@ -320,7 +316,7 @@ std::string PornTextDetector::preproccesing(std::string &text) {
 
     std::string clear_msg = "";
 
-    for (std::string word: token) {
+    for (std::string word : token) {
         clear_msg += word + ' ';
     }
 
@@ -377,14 +373,7 @@ Probability PornTextDetector::forward(std::string &text) {
 }
 
 std::string PornTextDetector::text_replace() {
-
-//    if (prob.porn > threshold) {
-//        for (size_t i = 0; i < ALPH.size(); ++i) {
-//            std::cout << ALPH[i] << " ";
-//            std::replace(msg.begin(), msg.end(), ALPH[i], '*');
-//        }
-//    }
-
+    
     if (prob.porn > threshold) {
 
         Token token;
@@ -394,7 +383,7 @@ std::string PornTextDetector::text_replace() {
                      [](char c) { return c == ' '; });
 
         std::string new_msg = "";
-        for (std::string word: token) {
+        for (std::string word : token) {
             for (int i = 0; i < word.length() / 2; ++i) {
                 new_msg += '*';
             }
