@@ -15,7 +15,7 @@ jobs:
       - uses: Dovyski/setup-opencv-action@v1
         with:
           opencv-version: '4.5.4'
-      - run: sudo apt-get install -y libgtest-dev gcovr libboost-all-dev
+      - run: sudo apt-get install -y libgtest-dev gcovr libboost-all-dev valgrind
       - run: cd detecting && sudo wget https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.10.0%2Bcpu.zip
       - run: cd detecting && sudo unzip libtorch-cxx11-abi-shared-with-deps-1.10.0+cpu.zip
       - run: sudo wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz && sudo tar -xf release-1.7.0.tar.gz && rm -rf release-1.7.0.tar.gz
