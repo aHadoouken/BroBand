@@ -68,23 +68,37 @@ public:
     std::string blurring();
 };
 
-class PornTextDetector : public TorchWrapper<Token> {
+class PornTextDetector : public TorchWrapper<std::string> {
 private:
     std::string msg;
 
-    std::vector<std::string> get_stopwords();
+    int sock;
+
+    torch::Tensor sent2vec = torch::zeros({ 1, 100 });
+
+    Token get_stopwords();
+
+    void remove_bad_syms_words(Token &token);
+
+    void init_sockaddr(struct sockaddr_in* name, const char* hostname, uint16_t port);
+
+    void write_to_server(int fd, std::string msg);
+
+    void read_from_server(int fd, char* buf);
+
+    void get_word2vec_representation(std::string &text);
 
 public:
 
     PornTextDetector();
 
-    void remove_bad_syms_words(Token &token);
+    ~PornTextDetector();
 
-    Probability forward(Token &data) override;
+    Probability forward(std::string &text) override;
 
-    Token preproccesing(std::string &text);
+    std::string preproccesing(std::string &text);
 
-    std::string text_replace(Token data);
+    std::string text_replace();
 };
 
 #endif//BROBAND_DETECTING_H
