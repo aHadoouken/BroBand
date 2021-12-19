@@ -1,11 +1,11 @@
 
 #include "detecting.h"
 
-#include <opencv2/opencv.hpp>// for image proccessing
-#include <torch/script.h>// for torchScript
-#include <boost/beast.hpp>// for base64
+#include <opencv2/opencv.hpp>
+#include <torch/script.h>
+#include <boost/beast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <fstream>// for file
+#include <fstream>
 #include <stdlib.h>
 #include <chrono>
 #include <sys/socket.h>
