@@ -95,8 +95,7 @@ Probability PornImageDetector::forward(torch::Tensor &img) {
     }
 }
 
-std::string PornImageDetector::blurring()
-{
+std::string PornImageDetector::blurring() {
     if (prob.porn > threshold) {
         cv::GaussianBlur(orig_img, orig_img,
                          cv::Size(31, 31),
@@ -201,7 +200,7 @@ PornTextDetector::PornTextDetector() {
     struct sockaddr_in servername;
     init_sockaddr(&servername, "localhost", 9090);
 
-    if (0 > connect(sock, (struct sockaddr*)&servername, sizeof(servername))) {
+    if (0 > connect(sock, (struct sockaddr *) &servername, sizeof(servername))) {
         perror("connect (PornTextDetector)");
         exit(EXIT_FAILURE);
     }
@@ -211,12 +210,11 @@ PornTextDetector::~PornTextDetector() {
     close(sock);
 }
 
-void PornTextDetector::init_sockaddr(struct sockaddr_in* name, const char* hostname, uint16_t port)
-{
+void PornTextDetector::init_sockaddr(struct sockaddr_in *name, const char *hostname, uint16_t port) {
     name->sin_family = AF_INET;
     name->sin_port = htons(port);
 
-    struct hostent* hostinfo;
+    struct hostent *hostinfo;
     hostinfo = gethostbyname(hostname);
 
     if (hostinfo == NULL) {
@@ -224,7 +222,7 @@ void PornTextDetector::init_sockaddr(struct sockaddr_in* name, const char* hostn
         exit(EXIT_FAILURE);
     }
 
-    name->sin_addr = *(struct in_addr*)hostinfo->h_addr;
+    name->sin_addr = *(struct in_addr *) hostinfo->h_addr;
 }
 
 void PornTextDetector::write_to_server(int fd, std::string msg) {
@@ -235,8 +233,7 @@ void PornTextDetector::write_to_server(int fd, std::string msg) {
     int flags = 0;
     while (left > 0) {
         sent = ::send(fd, msg.data() + sent, msg.size() - sent, flags);
-        if (-1 == sent)
-        {
+        if (-1 == sent) {
             throw std::runtime_error("write failed: " + std::string(strerror(errno)));
         }
 
@@ -244,26 +241,22 @@ void PornTextDetector::write_to_server(int fd, std::string msg) {
     }
 }
 
-void PornTextDetector::read_from_server(int fd, char* buf)
-{
+void PornTextDetector::read_from_server(int fd, char *buf) {
     int n = {};
 
     n = ::recv(fd, buf, 2048, MSG_NOSIGNAL);
 
     std::cout << n << "\n";
 
-    if (-1 == n && errno != EAGAIN)
-    {
+    if (-1 == n && errno != EAGAIN) {
         throw std::runtime_error("read failed: " + std::string(strerror(errno)));
     }
 
-    if (0 == n)
-    {
+    if (0 == n) {
         throw std::runtime_error("client: " + std::to_string(fd) + " disconnected");
     }
 
-    if (-1 == n)
-    {
+    if (-1 == n) {
         throw std::runtime_error("client: " + std::to_string(fd) + " timeouted");
     }
 }
@@ -334,8 +327,7 @@ std::string PornTextDetector::preproccesing(std::string &text) {
     return clear_msg;
 }
 
-void PornTextDetector::get_word2vec_representation(std::string &text)
-{
+void PornTextDetector::get_word2vec_representation(std::string &text) {
     write_to_server(sock, text);
 
     char buffer[2048];
@@ -402,7 +394,7 @@ std::string PornTextDetector::text_replace() {
                      [](char c) { return c == ' '; });
 
         std::string new_msg = "";
-        for (std::string word : token) {
+        for (std::string word: token) {
             for (int i = 0; i < word.length() / 2; ++i) {
                 new_msg += '*';
             }
