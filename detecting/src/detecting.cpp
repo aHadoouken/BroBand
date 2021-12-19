@@ -28,9 +28,6 @@
 std::string BAD_SYM = "!#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 const std::string ALPH = "абвгдеёжзийклмнопрстуфхцчшщъьыэюя";
 
-std::vector<double> MEAN = {0.485, 0.456, 0.406};
-std::vector<double> STD = {0.229, 0.224, 0.225};
-
 std::ostream &operator<<(std::ostream &out, const Probability &prob) {
     out << "[" << 1 - prob.porn << "," << prob.porn << "]"
         << "\n";
@@ -183,7 +180,6 @@ torch::Tensor PornImageDetector::preproccesing(cv::Mat &img) {
 
     // добавляем фиктивную ось в тензор (will be dim = 4)
     img_tensor.unsqueeze_(0);
-    //    img_tensor = torch::data::transforms::Normalize<>(MEAN, STD)(img_tensor);
 
     return img_tensor.clone();
 }
@@ -351,16 +347,11 @@ Probability PornTextDetector::forward(std::string &text) {
 
     torch::Tensor output = model.forward({sent2vec}).toTensor();
 
-    std::cout << output << "\n";
-
     // вектор вероятностей принадлежности классам size = 2
     std::tuple<torch::Tensor, torch::Tensor> result = torch::max(output, 1);
 
     torch::Tensor proba_ = std::get<0>(result);
     torch::Tensor index = std::get<1>(result);
-
-    std::cout << proba_ << "\n";
-    std::cout << index << "\n";
 
     auto proba = proba_.accessor<float, 1>();
     auto idx = index.accessor<long, 1>();
