@@ -262,6 +262,7 @@ std::vector<std::string> PornTextDetector::get_stopwords() {
     std::ifstream fin(STOPWORDS);// открыли файл для чтения
     char buffer[MAGIC_N];
     fin.getline(buffer, MAGIC_N);
+    fin.close();
 
     std::string tmp = buffer;
     std::vector<std::string> stopwords;
