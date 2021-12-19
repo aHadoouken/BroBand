@@ -2,6 +2,7 @@
 #include "detecting.h"
 
 #include <opencv2/opencv.hpp>
+
 #include <torch/script.h>
 #include <boost/beast.hpp>
 #include <boost/algorithm/string.hpp>
