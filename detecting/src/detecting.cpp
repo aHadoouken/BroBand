@@ -246,29 +246,25 @@ void PornTextDetector::write_to_server(int fd, std::string msg) {
 
 void PornTextDetector::read_from_server(int fd, char* buf)
 {
-    int n = 8;
-    size_t recv_d = 0;
+    int n = {};
 
-    while (8 == n) {
+    n = ::recv(fd, buf, 2048, MSG_NOSIGNAL);
 
-        n = ::recv(fd, buf + recv_d, sizeof(buf), MSG_NOSIGNAL);
+    std::cout << n << "\n";
 
-        if (-1 == n && errno != EAGAIN)
-        {
-            throw std::runtime_error("read failed: " + std::string(strerror(errno)));
-        }
+    if (-1 == n && errno != EAGAIN)
+    {
+        throw std::runtime_error("read failed: " + std::string(strerror(errno)));
+    }
 
-        if (0 == n)
-        {
-            throw std::runtime_error("client: " + std::to_string(fd) + " disconnected");
-        }
+    if (0 == n)
+    {
+        throw std::runtime_error("client: " + std::to_string(fd) + " disconnected");
+    }
 
-        if (-1 == n)
-        {
-            throw std::runtime_error("client: " + std::to_string(fd) + " timeouted");
-        }
-
-        recv_d += n;
+    if (-1 == n)
+    {
+        throw std::runtime_error("client: " + std::to_string(fd) + " timeouted");
     }
 }
 
@@ -363,11 +359,16 @@ Probability PornTextDetector::forward(std::string &text) {
 
     torch::Tensor output = model.forward({sent2vec}).toTensor();
 
+    std::cout << output << "\n";
+
     // вектор вероятностей принадлежности классам size = 2
     std::tuple<torch::Tensor, torch::Tensor> result = torch::max(output, 1);
 
     torch::Tensor proba_ = std::get<0>(result);
     torch::Tensor index = std::get<1>(result);
+
+    std::cout << proba_ << "\n";
+    std::cout << index << "\n";
 
     auto proba = proba_.accessor<float, 1>();
     auto idx = index.accessor<long, 1>();

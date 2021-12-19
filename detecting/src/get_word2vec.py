@@ -21,6 +21,7 @@ if __name__ == '__main__':
     
     # создание сокета для TCP/IP
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     # Привязываем сокет к порту
     server_address = ('localhost', 9090)
@@ -43,6 +44,7 @@ if __name__ == '__main__':
                 if data:
                     vec = ' '.join(list(map(str, get_word2vec(str(data.decode()), word2vec_porn))))
                     connection.sendall(vec.encode('utf-8'))
+                    print(vec)
                     del vec
                     del data
                 else:
