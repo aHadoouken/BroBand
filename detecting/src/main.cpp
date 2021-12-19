@@ -12,26 +12,33 @@
 
 int main() {
     
+    // создаем объект
     PornImageDetector img_detector;
-    
+
+    // устанавливаем порог
     img_detector.set_threshold(0.7);
-    
+
+    // загружаем модель
     img_detector.load_model(MODEL_IMG);
-    
+
+    // читаем изображение
     cv::Mat img = img_detector.load_img(TEST_IMAGE);
-    
+
+    // предобработка
     torch::Tensor img_tensor = img_detector.preproccesing(img);
-    
+
+    // прогоняем по сетке изображение
     Probability probability = img_detector.forward(img_tensor);
-    
+
     std::cout << probability;
-    
+
+    // блюрим при необходимости
     std::string base64_code = img_detector.blurring();
-    
+
     PornTextDetector txt_detector;
-    
+
     txt_detector.load_model(MODEL_TXT);
-    
+
     std::vector<std::string> txt{};
 
     txt.push_back(std::string("порно смотреть онлайн"));
@@ -39,9 +46,9 @@ int main() {
     txt.push_back(std::string("сок и виски под окном"));
     txt.push_back(std::string("использование разных проституток"));
     txt.push_back(std::string("убля шлюхи и проститутки"));
-    
-    for (std::string word : txt) {
-        
+
+    for (std::string word: txt) {
+
         auto res = txt_detector.preproccesing(word);
 
         auto prob = txt_detector.forward(res);
