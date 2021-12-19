@@ -15,8 +15,8 @@
 #include <algorithm>
 #include <string>
 
-#define HEIGHT 224// height of input net's
-#define WIDTH 224// width of input net's
+#define HEIGHT 224
+#define WIDTH 224
 #define MAGIC_N 1234// size of symbols in STOPWORDS file
 
 #define STOPWORDS "../../requirement/STOPWORDS.txt"
