@@ -47,7 +47,7 @@ int main() {
     txt.push_back(std::string("использование разных проституток"));
     txt.push_back(std::string("убля шлюхи и проститутки"));
 
-    for (std::string word: txt) {
+    for (std::string word : txt) {
 
         auto res = txt_detector.preproccesing(word);
 
