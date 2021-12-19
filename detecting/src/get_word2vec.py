@@ -12,6 +12,9 @@ def get_word2vec(text, model):
             myvector += model.wv[word]
         except:
             continue
+
+    if str(myvector[0]) == '0.0' and str(myvector[1]) == '0.0'and  str(myvector[2]) == '0.0':
+        myvector = np.full((100), 0.5)
     
     return myvector
 
