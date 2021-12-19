@@ -1,19 +1,28 @@
 //
 // Created by d3vyatk4 on 15.11.2021.
 //
+
 #include "detecting.h"
 #include "Exception.h"
-#include <opencv2/opencv.hpp>
-#include <torch/script.h>
-#include <boost/beast.hpp>
+#include <opencv2/opencv.hpp>// for image proccessing
+#include <torch/script.h>// for torchScript
+#include <boost/beast.hpp>// for base64
 #include <boost/algorithm/string.hpp>
-#include <fstream>
-#define HEIGHT 224
-#define WIDTH 224
-#define MAGIC_N 1234
+#include <fstream>// for file
+#include <stdlib.h>
+#include <chrono>
+#include <sys/socket.h>
+#include <algorithm>
+#include <string>
+
+#define HEIGHT 224// height of input net's
+#define WIDTH 224// width of input net's
+#define MAGIC_N 1234// size of symbols in STOPWORDS file
+
 #define STOPWORDS "../../requirement/STOPWORDS.txt"
 
 std::string BAD_SYM = "!#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+const std::string ALPH = "абвгдеёжзийклмнопрстуфхцчшщъьыэюя";
 
 std::vector<double> MEAN = {0.485, 0.456, 0.406};
 std::vector<double> STD = {0.229, 0.224, 0.225};
@@ -43,7 +52,8 @@ int TorchWrapper<T>::load_model(const std::string &path) {
     try {
         model = torch::jit::load(path);
         // Error - основной класс ошибок
-    } catch (const c10::Error &ex) {
+    }
+    catch (const c10::Error &ex) {
         std::cerr << "Error loading the model\n";
         return 1;
     }
@@ -54,6 +64,10 @@ int TorchWrapper<T>::load_model(const std::string &path) {
 
 PornImageDetector::PornImageDetector(const std::string &path_to_model) {
     load_model(path_to_model);
+}
+
+PornImageDetector::~PornImageDetector() {
+
 }
 
 Probability PornImageDetector::forward(torch::Tensor &img) {
@@ -81,7 +95,8 @@ Probability PornImageDetector::forward(torch::Tensor &img) {
     }
 }
 
-std::string PornImageDetector::blurring() {
+std::string PornImageDetector::blurring()
+{
     if (prob.porn > threshold) {
         cv::GaussianBlur(orig_img, orig_img,
                          cv::Size(31, 31),
@@ -145,10 +160,12 @@ cv::Mat PornImageDetector::load_img(const std::string &base64_code) {
     try {
         // BGR to RGB
         permutation_channels(img);
-    } catch (const cv::Exception &ex) {
+    }
+    catch (const cv::Exception &ex) {
         // если не получилось, работаем с BGR
         std::cout << "Using BGR format for image\n";
     }
+
     return img;
 }
 
@@ -172,16 +189,95 @@ torch::Tensor PornImageDetector::preproccesing(cv::Mat &img) {
     return img_tensor.clone();
 }
 
-PornTextDetector::PornTextDetector() {}
+PornTextDetector::PornTextDetector() {
 
-Probability PornTextDetector::forward(Token &data) {
-    throw NotImplemented();
+    sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (sock < 0) {
+        perror("socket (PornTextDetector)");
+        exit(EXIT_FAILURE);
+    }
+
+    struct sockaddr_in servername;
+    init_sockaddr(&servername, "localhost", 9090);
+
+    if (0 > connect(sock, (struct sockaddr*)&servername, sizeof(servername))) {
+        perror("connect (PornTextDetector)");
+        exit(EXIT_FAILURE);
+    }
+}
+
+PornTextDetector::~PornTextDetector() {
+    close(sock);
+}
+
+void PornTextDetector::init_sockaddr(struct sockaddr_in* name, const char* hostname, uint16_t port)
+{
+    name->sin_family = AF_INET;
+    name->sin_port = htons(port);
+
+    struct hostent* hostinfo;
+    hostinfo = gethostbyname(hostname);
+
+    if (hostinfo == NULL) {
+        std::cout << stderr << "Unknown host " << hostname << "\n";
+        exit(EXIT_FAILURE);
+    }
+
+    name->sin_addr = *(struct in_addr*)hostinfo->h_addr;
+}
+
+void PornTextDetector::write_to_server(int fd, std::string msg) {
+
+    size_t left = msg.size();
+    ssize_t sent = 0;
+
+    int flags = 0;
+    while (left > 0) {
+        sent = ::send(fd, msg.data() + sent, msg.size() - sent, flags);
+        if (-1 == sent)
+        {
+            throw std::runtime_error("write failed: " + std::string(strerror(errno)));
+        }
+
+        left -= sent;
+    }
+}
+
+void PornTextDetector::read_from_server(int fd, char* buf)
+{
+    int n = 8;
+    size_t recv_d = 0;
+
+    while (8 == n) {
+
+        n = ::recv(fd, buf + recv_d, sizeof(buf), MSG_NOSIGNAL);
+
+        if (-1 == n && errno != EAGAIN)
+        {
+            throw std::runtime_error("read failed: " + std::string(strerror(errno)));
+        }
+
+        if (0 == n)
+        {
+            throw std::runtime_error("client: " + std::to_string(fd) + " disconnected");
+        }
+
+        if (-1 == n)
+        {
+            throw std::runtime_error("client: " + std::to_string(fd) + " timeouted");
+        }
+
+        recv_d += n;
+    }
 }
 
 std::vector<std::string> PornTextDetector::get_stopwords() {
+
     std::ifstream fin(STOPWORDS);// открыли файл для чтения
     char buffer[MAGIC_N];
     fin.getline(buffer, MAGIC_N);
+
     std::string tmp = buffer;
     std::vector<std::string> stopwords;
     boost::split(stopwords, tmp, [](char c) { return c == ' '; });
@@ -194,6 +290,7 @@ void PornTextDetector::remove_bad_syms_words(Token &token) {
     bool flag = false;
 
     for (size_t i = 0; i < token.size(); ++i) {
+        flag = false;
         for (int j = 0; j < BAD_SYM.size(); ++j) {
             token[i].erase(std::remove(token[i].begin(),
                                        token[i].end(),
@@ -216,22 +313,104 @@ void PornTextDetector::remove_bad_syms_words(Token &token) {
     token = good_words;
 }
 
-Token PornTextDetector::preproccesing(std::string &text) {
+std::string PornTextDetector::preproccesing(std::string &text) {
+
     msg = text;
 
     //  нижний регистр
     boost::algorithm::to_lower(text);
 
-    std::cout << text << "\n";
-
     //токенизация
     Token token;
 
-    boost::split(token, text, [](char c) { return c == ' '; });
+    boost::split(token,
+                 text,
+                 [](char c) { return c == ' '; });
 
     remove_bad_syms_words(token);
 
-    std::cout << token << "\n";
+    std::string clear_msg = "";
 
-    return token;
+    for (std::string word: token) {
+        clear_msg += word + ' ';
+    }
+
+    return clear_msg;
+}
+
+void PornTextDetector::get_word2vec_representation(std::string &text)
+{
+    write_to_server(sock, text);
+
+    char buffer[2048];
+    read_from_server(sock, buffer);
+
+    std::string tmp;
+    std::stringstream ss(buffer);
+    size_t i = 0;
+
+    while (std::getline(ss, tmp, ' ')) {
+        sent2vec[0][i] = torch::tensor(std::stod(tmp));
+        i++;
+    }
+}
+
+Probability PornTextDetector::forward(std::string &text) {
+
+    get_word2vec_representation(text);
+
+    torch::NoGradGuard no_grad;// turn off trainable function
+
+    torch::Tensor output = model.forward({sent2vec}).toTensor();
+
+    // вектор вероятностей принадлежности классам size = 2
+    std::tuple<torch::Tensor, torch::Tensor> result = torch::max(output, 1);
+
+    torch::Tensor proba_ = std::get<0>(result);
+    torch::Tensor index = std::get<1>(result);
+
+    auto proba = proba_.accessor<float, 1>();
+    auto idx = index.accessor<long, 1>();
+
+    if (!idx[0]) {
+        Probability probability(1 - proba[0]);
+        prob.porn = 1 - proba[0];
+        return probability;
+    } else {
+        Probability probability(proba[0]);
+        prob.porn = proba[0];
+        return probability;
+    }
+}
+
+std::string PornTextDetector::text_replace() {
+
+//    if (prob.porn > threshold) {
+//        for (size_t i = 0; i < ALPH.size(); ++i) {
+//            std::cout << ALPH[i] << " ";
+//            std::replace(msg.begin(), msg.end(), ALPH[i], '*');
+//        }
+//    }
+
+    if (prob.porn > threshold) {
+
+        Token token;
+
+        boost::split(token,
+                     msg,
+                     [](char c) { return c == ' '; });
+
+        std::string new_msg = "";
+        for (std::string word : token) {
+            for (int i = 0; i < word.length() / 2; ++i) {
+                new_msg += '*';
+            }
+
+            new_msg += ' ';
+        }
+
+        return new_msg;
+    }
+
+    return msg;
 }
