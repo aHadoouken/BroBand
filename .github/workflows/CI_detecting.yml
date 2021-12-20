@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: pip install gensim
-      - run:  /bin/python3 "/home/runner/work/BroBand/BroBand/detecting/src/get_word2vec.py"
       - uses: actions/checkout@v2
+      - run:  /bin/python3 "/home/runner/work/BroBand/BroBand/detecting/src/get_word2vec.py"
       - uses: Dovyski/setup-opencv-action@v1
         with:
           opencv-version: '4.5.4'
