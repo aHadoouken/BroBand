@@ -4,8 +4,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 project(tests)
 
-#add_compile_options(-g -O0 -Wextra -Wall -Wextra -Wpedantic -lgcov --coverage)
-#add_link_options( -O0 -lgcov --coverage)
+add_compile_options(-g -O0 -Wextra -Wall -Wextra -Wpedantic -lgcov --coverage)
+add_link_options( -O0 -lgcov --coverage)
 
 add_compile_options(-pthread)
 list(APPEND CMAKE_PREFIX_PATH "/home/runner/work/BroBand/BroBand/detecting/libtorch")
