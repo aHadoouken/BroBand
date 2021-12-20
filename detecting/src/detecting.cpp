@@ -368,14 +368,14 @@ Probability PornTextDetector::forward(std::string &text) {
     }
 }
 
-std::string PornTextDetector::text_replace() {
+std::string PornTextDetector::text_replace(std::string &text) {
 
     if (prob.porn > threshold) {
 
         Token token;
 
         boost::split(token,
-                     msg,
+                     text,
                      [](char c) { return c == ' '; });
 
         std::string new_msg = "";
@@ -387,6 +387,7 @@ std::string PornTextDetector::text_replace() {
             new_msg += ' ';
         }
 
+        boost::trim(new_msg);
         return new_msg;
     }
 
