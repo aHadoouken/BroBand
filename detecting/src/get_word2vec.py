@@ -20,7 +20,7 @@ def get_word2vec(text, model):
 
 if __name__ == '__main__':
 
-    word2vec_porn = gensim.models.Word2Vec.load('../model/word2vec/porn_word2vec.model')
+    word2vec_porn = gensim.models.Word2Vec.load('../../model/word2vec/porn_word2vec.model')
     
     # создание сокета для TCP/IP
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
