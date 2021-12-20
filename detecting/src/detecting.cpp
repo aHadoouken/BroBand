@@ -321,6 +321,8 @@ std::string PornTextDetector::preproccesing(std::string &text) {
         clear_msg += word + ' ';
     }
 
+    boost::trim(clear_msg);
+
     return clear_msg;
 }
 
