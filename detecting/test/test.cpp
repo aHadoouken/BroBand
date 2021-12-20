@@ -117,28 +117,25 @@ TEST(IMAGE_PORN_DETECTOR, full_way) {
     img_detector.blurring();
 }
 
-TEST(MESSAGE_DETECTOR, forward) {
+TEST(MESSAGE_PORN_DETECTOR, preproccessing) {
 
-   PornTextDetector msgDetector;
-   Message *msg;
+    PornTextDetector txt_detector;
 
-   Probability prob_true;
-   prob_true.predict_proba = {0.2, 0.8};
+    std::string msg = "сок и виски под окном";
+    std::string res = txt_detector.preproccesing(msg);
 
-   Probability pred_prob = msgDetector.forward(msg);
-
-   for (int i = 0; i < 2; ++i) {
-       EXPECT_DOUBLE_EQ(pred_prob.predict_proba[i], prob_true.predict_proba[i]);
-   }
+    EXPECT_TRUE(res == "сок виски окном");
 }
 
-TEST(MESSAGE_DETECTOR, text_replace) {
+TEST(MESSAGE_PORN_DETECTOR, text_replace) {
 
-   PornTextDetector msgDetector;
-   Message *msg = nullptr;
-   MessageWrapper *msg_wrap = msgDetector.text_replace(msg);
+    PornTextDetector txt_detector;
 
-   EXPECT_TRUE(msg_wrap->is_replace);
+    std::string msg = "порно смотреть онлайн";
+
+    std::string res = txt_detector.text_replace(msg);
+
+    EXPECT_TRUE(res == "***** ******** ******");
 }
 
 int main(int argc, char *argv[]) {
