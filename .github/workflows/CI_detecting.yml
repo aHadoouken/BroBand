@@ -11,6 +11,7 @@ jobs:
     name: Build project & valgring & coverage
     runs-on: ubuntu-latest
     steps:
+      - run: pip install gensim
       - uses: actions/checkout@v2
       - uses: Dovyski/setup-opencv-action@v1
         with:
