@@ -56,7 +56,7 @@ int main() {
         std::cout << "\n";
         std::cout << word << "\n";
         std::cout << prob;
-        std::cout << txt_detector.text_replace() << "\n\n";
+        std::cout << txt_detector.text_replace(word) << "\n\n";
     }
 
     return 0;
