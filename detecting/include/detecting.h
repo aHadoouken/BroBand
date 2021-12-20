@@ -16,7 +16,7 @@ struct Probability {
 
     double porn;
 
-    Probability() : porn(0) {}
+    Probability() : porn(1) {}
 
     Probability(const double &prob) : porn(prob) {}
 
@@ -98,7 +98,7 @@ public:
 
     std::string preproccesing(std::string &text);
 
-    std::string text_replace();
+    std::string text_replace(std::string &text);
 };
 
 #endif//BROBAND_DETECTING_H
