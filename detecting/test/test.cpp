@@ -123,7 +123,7 @@ TEST(MESSAGE_PORN_DETECTOR, preproccessing) {
 
     std::string msg = "сок и виски под окном";
     std::string res = txt_detector.preproccesing(msg);
-
+    std::cout << res << "\n";
     EXPECT_TRUE(res == "сок виски окном");
 }
 
@@ -134,7 +134,7 @@ TEST(MESSAGE_PORN_DETECTOR, text_replace) {
     std::string msg = "порно смотреть онлайн";
 
     std::string res = txt_detector.text_replace(msg);
-
+    std::cout << res << "\n";
     EXPECT_TRUE(res == "***** ******** ******");
 }
 
