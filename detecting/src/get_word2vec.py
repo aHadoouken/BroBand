@@ -32,6 +32,8 @@ if __name__ == '__main__':
 
     # слушаем
     sock.listen(1)
+    
+    print("Service is ready...")
 
     # ждем соединения
     while True:
