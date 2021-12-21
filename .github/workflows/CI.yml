@@ -5,28 +5,8 @@ on:
   pull_request:
     branches: [ Client ]
 jobs:
-  build-project:
-    name: Build project
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: sudo apt-get update
-      - run: sudo apt-get install wget
-      - run: sudo apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
-      - run: wget -O boost_1_77_0.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz
-      - run: tar xzvf boost_1_77_0.tar.gz
-      - run: cd boost_1_77_0/ && ./bootstrap.sh --prefix=/usr/ && ./b2 && sudo ./b2 install
-      - run: sudo apt-get install -y libgtest-dev
-      - run: sudo apt-get install -y qt5-default qtbase5-examples qtdeclarative5-examples
-      - run: sudo apt-get install -y libboost-all-dev
-      - run: sudo wget https://github.com/google/googletest/archive/release-1.7.0.tar.gz
-      - run: sudo tar -xf release-1.7.0.tar.gz && rm -rf release-1.7.0.tar.gz
-      - run: cd googletest-release-1.7.0
-      - run: sudo cmake
-      - run: sudo make googletest-release-1.7.0
-      - run: sudo mkdir build && cd build && sudo cmake .. && sudo make
   formatting-check:
-    needs: build-project
+
     name: Format checking
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +17,7 @@ jobs:
         clang-format-version: '13'
         check-path: '/src'
   cpp-check:
-    needs: build-project
+
     name: Static code analysis
     runs-on: ubuntu-latest
     steps:
@@ -46,7 +26,7 @@ jobs:
     - run: sudo apt-get install cppcheck
     - run: sudo cppcheck --enable=all --inconclusive ./src
   gcovr:
-    needs: build-project
+
     name: Coverage
     runs-on: ubuntu-latest
     steps:
@@ -78,7 +58,7 @@ jobs:
           name: coverage-report
           path: coverage.html
   valgrind:
-    needs: [build-project]
+
     name: Valgrind
     runs-on: ubuntu-latest
     steps:
