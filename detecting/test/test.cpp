@@ -144,7 +144,7 @@ TEST(MESSAGE_PORN_DETECTOR, preproccessing) {
 
     std::string msg = "порно смотреть онлайн";
     std::string res = txt_detector.preproccesing(msg);
-    auto probability = txt.forward(res);
+    auto probability = txt_detector.forward(res);
     EXPECT_GT(probability.porn, 0.5);
     txt_detector.text_replace(msg);
 }
