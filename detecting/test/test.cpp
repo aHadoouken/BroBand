@@ -117,15 +117,15 @@ TEST(IMAGE_PORN_DETECTOR, full_way) {
     img_detector.blurring();
 }
 
-// TEST(MESSAGE_PORN_DETECTOR, preproccessing) {
+TEST(MESSAGE_PORN_DETECTOR, preproccessing) {
 
-//     PornTextDetector txt_detector;
+    PornTextDetector txt_detector;
 
-//     std::string msg = "сок и виски под окном";
-//     std::string res = txt_detector.preproccesing(msg);
-//     std::cout << res << "+++++++++++++++++++++++++++++\n";
-//     EXPECT_TRUE(res == "сок и виски под окном");
-// }
+    std::string msg = "сок и виски под окном";
+    std::string res = txt_detector.preproccesing(msg);
+    std::cout << res << "+++++++++++++++++++++++++++++\n";
+    EXPECT_TRUE(res != "сок и виски под окном");
+}
 
 TEST(MESSAGE_PORN_DETECTOR, text_replace) {
 
