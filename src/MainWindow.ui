@@ -143,7 +143,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
        <string notr="true">background-color: rgb(23, 43, 74);</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="SignIn">
        <property name="sizePolicy">
@@ -3777,6 +3777,7 @@ font: 10pt &quot;Sans&quot;;</string>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
+  <include location="res.qrc"/>
   <include location="res.qrc"/>
  </resources>
  <connections/>

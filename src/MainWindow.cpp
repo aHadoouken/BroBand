@@ -160,6 +160,7 @@ void MainWindow::itemClicked(QListWidgetItem *) {
 }
 
 void MainWindow::on_signup_haveAcc_button_clicked() {
+    ui.signin_error_label->setText("");
     ui.stackedWidget->setCurrentWidget(ui.SignIn);
     ui.signup_error_label->setText("");
     ui.username_edit->setText("");

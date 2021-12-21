@@ -398,12 +398,3 @@ void Commands::update_current_chat(Chat &chat, User &user)
 bool Commands::get_status() { return status; }
 
 void Commands::stop_connect() { client->do_close(); }
-
-void Commands::del_current_user(User &user)
-{
-    user.user_chats_by_id.clear();
-    user.user_chats_by_name.clear();
-    user.user_friend_by_id.clear();
-    user.user_friend_by_name.clear();
-    user.chats_id.clear();
-}
