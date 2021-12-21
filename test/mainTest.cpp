@@ -15,6 +15,8 @@
 
 #define SUCCESS 200
 
+std::array<uint64_t, 2> chat_users_id;
+
 TEST(REG_FORM_TEST, EQ) {
     auto cmd = new Commands();
 
@@ -139,7 +141,7 @@ TEST(REG_USER_TEST, EQ) {
     user.profile_avatar = "/home/andrew/Загрузки/avatar.jpg";
 
     check_reg(user, er_code);
-
+    chat_users_id.at(0) = user.id;
     ASSERT_EQ(er_code, SUCCESS);
 }
 
@@ -193,14 +195,13 @@ TEST(LOG_USER_TEST, EQ) {
     user.password = "1243564";
 
     check_log(user, er_code);
-
     ASSERT_EQ(er_code, 401);
 
     user.login = "andrew";
     user.password = "123";
 
     check_log(user, er_code);
-
+    chat_users_id.at(1) = user.id;
     ASSERT_EQ(er_code, SUCCESS);
 }
 
@@ -210,10 +211,14 @@ void check_find_friend(Friend &new_friend, int &er_code) {
     auto handlers = new Handlers();
     auto client = new Client(ioc);
 
-    if (client->get_status()) {
-        ioc.restart();
+    QString mode;
+    if (!new_friend.login.isEmpty()) {
+        mode = "by_login";
+    } else {
+        mode = "by_id";
     }
-    client->run(handlers->find_friend_request(new_friend));
+    ioc.restart();
+    client->run(handlers->find_friend_request(new_friend, mode));
     ioc.run();
     int response_result = client->get_response().result_int();
     try {

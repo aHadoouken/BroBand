@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <QObject>
 
 using tcp = boost::asio::ip::tcp;
 namespace beast = boost::beast;       // from <boost/beast.hpp>
@@ -26,25 +27,30 @@ class Client {
 
     http::request<http::string_body> request_;
     http::response<http::string_body> response_;
-    const std::string server = "1940-195-19-47-39.ngrok.io";
+    http::response<http::string_body> response_msg;
+    const std::string server = "2e1f-195-19-47-160.ngrok.io";
     const std::string port = "http";
 
     bool status;
     QString errors;
+    net::io_context& io_context_;
 
    private:
     void handle_resolve(beast::error_code, tcp::resolver::results_type);
     void handle_connect(beast::error_code, tcp::resolver::results_type::endpoint_type);
     void handle_write_request(beast::error_code, std::size_t);
     void handle_read(beast::error_code, std::size_t);
-
+    void handle_do_read(beast::error_code, std::size_t);
+    void write(http::request<http::string_body>);
    public:
     explicit Client(net::io_context&);
     ~Client();
     void run(http::request<http::string_body>);
-    void do_write(http::request<http::string_body> request);
+    void do_write(http::request<http::string_body>);
+    void do_read();
     void do_close();
     http::response<http::string_body> get_response();
+    http::response<http::string_body> get_response_msg();
     bool get_status();
 };
 

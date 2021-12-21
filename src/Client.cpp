@@ -1,6 +1,6 @@
 #include "Client.h"
 
-Client::Client(net::io_context& ioc) : resolver_(net::make_strand(ioc)), stream_(net::make_strand(ioc)) {
+Client::Client(net::io_context& ioc) : resolver_(net::make_strand(ioc)), stream_(net::make_strand(ioc)), io_context_(ioc) {
     status = false;
 }
 
@@ -36,7 +36,6 @@ void Client::handle_connect(beast::error_code err, tcp::resolver::results_type::
 
 void Client::handle_write_request(beast::error_code err, std::size_t bytes_transferred) {
     boost::ignore_unused(bytes_transferred);
-
     if (!err) {
         response_ = {};
         http::async_read(stream_, buffer_, response_, beast::bind_front_handler(&Client::handle_read, this));
@@ -54,6 +53,7 @@ void Client::do_write(http::request<http::string_body> request) {
     http::async_write(stream_, request_, beast::bind_front_handler(&Client::handle_write_request, this));
 }
 
+
 void Client::handle_read(beast::error_code err, std::size_t bytes_transferred) {
     boost::ignore_unused(bytes_transferred);
     if (!err) {
@@ -64,6 +64,7 @@ void Client::handle_read(beast::error_code err, std::size_t bytes_transferred) {
         std::cout << errors.toStdString() << std::endl;
     }
 }
+
 
 void Client::do_close() {
     if (!status) {
@@ -76,3 +77,4 @@ void Client::do_close() {
 bool Client::get_status() { return status; }
 
 http::response<http::string_body> Client::get_response() { return response_; }
+http::response<http::string_body> Client::get_response_msg() { return response_msg; }
