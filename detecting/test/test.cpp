@@ -138,7 +138,7 @@ TEST(MESSAGE_PORN_DETECTOR, text_replace) {
     EXPECT_TRUE(res == "***** ******** ******");
 }
 
-TEST(MESSAGE_PORN_DETECTOR, preproccessing) {
+TEST(MESSAGE_PORN_DETECTOR, forward) {
 
     PornTextDetector txt_detector;
 
