@@ -69,9 +69,9 @@ void MainWindow::on_signin_signin_button_clicked() {
         ui.signup_avatar->setPixmap(avatar);
     }
     if (!user.chats_id.empty()) {
-        for (size_t i = 0; i < user.chats_id.size(); ++i) {
+        for (unsigned long i : user.chats_id) {
             Chat old_chat;
-            old_chat.id = user.chats_id.at(i);
+            old_chat.id = i;
             cmd->get_user_chat(old_chat, user);
             chat_by_friend_login.begin()->second = user.user_chats_by_id.find(old_chat.id)->second;
         }
@@ -328,16 +328,16 @@ void MainWindow::form_message_output(QString mode, Message n_msg) {
     int max_line_length = 30;
     int count_warp = 0;
 
-    for (int i = 0; i < n_msg.text.length(); i++) {
-        if (n_msg.text.at(i) > 32) {
-            new_message += n_msg.text.at(i);
+    for (auto i : n_msg.text) {
+        if (i > 32) {
+            new_message += i;
             line_break_count++;
         }
-        if (n_msg.text.at(i) == 32) {
-            new_message += n_msg.text.at(i);
+        if (i == 32) {
+            new_message += i;
             line_break_count = 0;
         }
-        if (n_msg.text.at(i) == '\n') {
+        if (i == '\n') {
             new_message += '\n';
             line_break_count = 0;
             count_warp++;

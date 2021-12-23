@@ -15,7 +15,7 @@
 namespace json = boost::json;
 namespace filesystem = boost::filesystem;
 
-Handlers::Handlers() {}
+Handlers::Handlers() = default;
 
 http::request<http::string_body> Handlers::add_user_request(User &user) {
     http::request<http::string_body> request;
@@ -170,9 +170,9 @@ std::vector<Message> Handlers::get_all_chat_msg_response(http::response<http::st
     json::object const &obj = jv.as_object();
     jv = obj.at("messages");
     std::vector<Message> msg;
-    for (size_t i = 0; i < jv.as_array().size(); ++i) {
+    for (auto &i : jv.as_array()) {
         Message new_msg;
-        json::object const &obj = jv.as_array().at(i).as_object();
+        json::object const &obj = i.as_object();
         new_msg.id = json::value_to<uint64_t>(obj.at("message_id"));
         new_msg.senderId = json::value_to<uint64_t>(obj.at("sender_id"));
         new_msg.sender_name = QString::fromStdString(json::value_to<std::string>(obj.at("sender_name")));
