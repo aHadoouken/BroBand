@@ -1,11 +1,13 @@
 #include "Commands.h"
+
 #include <unistd.h>
-#include <QWidget>
+
+#include <QDate>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QObject>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QDate>
-#include <QLabel>
+#include <QWidget>
 
 #define SUCCESS 200
 
@@ -21,7 +23,6 @@ Commands::~Commands() {
     delete client;
     delete handlers;
 }
-
 
 void Commands::run() { exec(); }
 
@@ -125,8 +126,7 @@ void Commands::find_friend(Friend &new_friend) {
     QString mode;
     if (!new_friend.login.isEmpty()) {
         mode = "by_login";
-    }
-    else {
+    } else {
         mode = "by_id";
     }
     ioc.restart();
@@ -209,8 +209,7 @@ void Commands::send_message(Message &message) {
     }
 }
 
-void Commands::get_user_chat(Chat &chat, User &user)
-{
+void Commands::get_user_chat(Chat &chat, User &user) {
     ioc.restart();
     client->do_write(handlers->find_chat_by_id_request(chat));
     ioc.run();
@@ -252,9 +251,7 @@ void Commands::get_user_chat(Chat &chat, User &user)
         status = false;
         emit create_chat_error_gen(err_map.find(err_val)->second);
         return;
-    }
-    catch (bool get_msg_err)
-    {
+    } catch (bool get_msg_err) {
         QString err_get_msg = "Не удалось воосстановить историю сообщений.";
         emit create_chat_error_gen(err_get_msg);
         status = false;
@@ -262,10 +259,8 @@ void Commands::get_user_chat(Chat &chat, User &user)
     }
 }
 
-bool Commands::get_all_chat_msg(Chat &chat, User &user)
-{
-    if (chat.total_messages == 0)
-    {
+bool Commands::get_all_chat_msg(Chat &chat, User &user) {
+    if (chat.total_messages == 0) {
         user.user_chats_by_id.find(chat.id)->second.last_msg_id = 0;
         user.user_chats_by_id.find(chat.id)->second.last_sender_id = 0;
         user.user_chats_by_name.find(chat.name)->second.last_msg_id = 0;
@@ -286,8 +281,7 @@ bool Commands::get_all_chat_msg(Chat &chat, User &user)
         }
         std::vector<Message> new_messages;
         new_messages = handlers->get_all_chat_msg_response(client->get_response());
-        for (size_t i = 0; i < new_messages.size(); ++i)
-        {
+        for (size_t i = 0; i < new_messages.size(); ++i) {
             user.user_chats_by_id.find(chat.id)->second.last_msg_id = new_messages.at(i).id;
             user.user_chats_by_id.find(chat.id)->second.last_sender_id = new_messages.at(i).senderId;
             user.user_chats_by_name.find(chat.name)->second.last_msg_id = new_messages.at(i).id;
@@ -301,9 +295,7 @@ bool Commands::get_all_chat_msg(Chat &chat, User &user)
         }
         status = true;
         return true;
-    }
-    catch (int err_val)
-    {
+    } catch (int err_val) {
         std::map<int, QString> err_map = {{303, "Сервер не отвечает."},
                                           {404, "Чата не существует."},
                                           {402, "Ошибка подключения к серверу. Обратитесь к Андрею."},
@@ -314,8 +306,7 @@ bool Commands::get_all_chat_msg(Chat &chat, User &user)
     }
 }
 
-void Commands::update_chats(struct User &user)
-{
+void Commands::update_chats(struct User &user) {
     ioc.restart();
     client->do_write(handlers->update_user_info_request(user));
     ioc.run();
@@ -331,10 +322,8 @@ void Commands::update_chats(struct User &user)
         }
         std::vector<uint64_t> update_chats_id;
         update_chats_id = handlers->update_user_info_response(client->get_response());
-        if (user.chats_id.size() != update_chats_id.size())
-        {
-            for (size_t i = user.chats_id.size(); i < update_chats_id.size(); ++i)
-            {
+        if (user.chats_id.size() != update_chats_id.size()) {
+            for (size_t i = user.chats_id.size(); i < update_chats_id.size(); ++i) {
                 Chat new_chat;
                 new_chat.id = update_chats_id.at(i);
                 get_user_chat(new_chat, user);
@@ -352,9 +341,7 @@ void Commands::update_chats(struct User &user)
     }
 }
 
-
-void Commands::update_current_chat(Chat &chat, User &user)
-{
+void Commands::update_current_chat(Chat &chat, User &user) {
     ioc.restart();
     client->do_write(handlers->update_current_chat_request(chat, user));
     ioc.run();
@@ -370,10 +357,8 @@ void Commands::update_current_chat(Chat &chat, User &user)
         }
         std::vector<Message> new_messages;
         new_messages = handlers->update_current_chat_response(client->get_response());
-        for (size_t i = 0; i < new_messages.size(); ++i)
-        {
-            if (new_messages.at(i).senderId == user.id)
-                continue;
+        for (size_t i = 0; i < new_messages.size(); ++i) {
+            if (new_messages.at(i).senderId == user.id) continue;
             user.user_chats_by_id.find(chat.id)->second.last_msg_id = new_messages.at(i).id;
             user.user_chats_by_id.find(chat.id)->second.last_sender_id = new_messages.at(i).senderId;
 
@@ -395,6 +380,6 @@ void Commands::update_current_chat(Chat &chat, User &user)
     }
 }
 
-bool Commands::get_status() { return status; }
+bool Commands::get_status() const { return status; }
 
 void Commands::stop_connect() { client->do_close(); }

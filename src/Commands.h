@@ -33,7 +33,7 @@ class Commands : public QThread {
     void stop_connect();
     QString check_reg_form_task(const QString, const QString, const QString, const QString);
     QString check_log_form_task(const QString, const QString);
-    bool get_status();
+    bool get_status() const;
     void reg_user(User &);
     void login_user(User &);
     void find_friend(Friend &);
