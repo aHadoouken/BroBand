@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resources/chat.png</file>
+        <file>Resources/profile.png</file>
+        <file>Resources/search.png</file>
+        <file>Resources/send.png</file>
+        <file>Resources/send_disabled.png</file>
+        <file>Resources/smile.png</file>
+        <file>Resources/loading.gif</file>
+        <file>Resources/plus.png</file>
+        <file>Resources/del.png</file>
+        <file>Resources/msg.png</file>
+        <file>Resources/logo.png</file>
+        <file>Resources/log_out.png</file>
+        <file>Resources/exit.png</file>
+        <file>Resources/update_icon.png</file>
+    </qresource>
+</RCC>
